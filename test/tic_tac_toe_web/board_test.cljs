@@ -11,16 +11,19 @@
 (use-fixtures :each
               {:after rtl/cleanup})
 
+(defn expect-empty-board [component]
+  (= 9
+     (-> component
+         (.queryAllByLabelText #"empty-board-space")
+         count)))
+
 (deftest board-component-test
   (testing "It should be empty if the board is empty"
     (with-mounted-component
       [tic-tac-toe-game]
       (fn [component]
         (is
-          (= 9
-             (-> component
-                 (.queryAllByLabelText #"empty-board-space")
-                 count))))))
+          (expect-empty-board component)))))
 
   (testing "It should change board state when clicking on an empty index"
     (with-mounted-component
@@ -31,4 +34,12 @@
           (= X
              (-> component
                  (.queryByLabelText (str X "-play-" [0 0]))
-                 (.-innerHTML))))))))
+                 (.-innerHTML)))))))
+  (testing "It should reset the board after clicking the reset button."
+    (with-mounted-component
+      [tic-tac-toe-game]
+      (fn [component]
+        (click-element (.getByLabelText component "reset-game"))
+        (is
+          (expect-empty-board component))))))
+

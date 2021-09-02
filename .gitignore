@@ -8,7 +8,7 @@ pom.xml
 .lein-repl-history
 .lein-plugins/
 node_modules
-resources/public/cljs-out
+resources/public/cljs-out/
 .repl
 .nrepl-port
 .cpcache/

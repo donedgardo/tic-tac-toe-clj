@@ -18,6 +18,21 @@
          :else
          nil)])
 
+(defn reset-button [on-reset]
+  [:button {:aria-label "reset-game"
+            :on-click   on-reset} "New Game"])
+
+(defn board-space [board space on-space-click]
+  (let [mark (board space)]
+    [:div.space
+     {:key        space
+      :id         space
+      :on-click   on-space-click
+      :aria-label (if (nil? mark)
+                    (str "empty-board-space-" space)
+                    (str mark "-play-" space))}
+     mark]))
+
 (defn tic-tac-toe-game []
   (let [game (atom new-game)]
     (fn []
@@ -25,17 +40,12 @@
             spaces (sort (keys board))]
         [:div
          (for [space spaces]
-           (let [mark ((:board @game) space)]
-             [:div.space
-              {:key        space
-               :id         space
-               :on-click   #(swap! game play space X)
-               :aria-label (if (nil? mark)
-                             (str "empty-board-space-" space)
-                             (str mark "-play-" space))}
-              mark]))
-         [game-over @game]]))))
-
+           (board-space
+             board
+             space
+             #(swap! game play space X)))
+         [game-over @game]
+         [reset-button #(reset! game new-game)]]))))
 
 (defn mount [el]
   (rdom/render

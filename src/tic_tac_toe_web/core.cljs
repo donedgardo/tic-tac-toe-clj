@@ -36,16 +36,17 @@
 (defn tic-tac-toe-game []
   (let [game (atom new-game)]
     (fn []
-      (let [board (:board @game)
-            spaces (sort (keys board))]
-        [:div
-         (for [space spaces]
-           (board-space
-             board
-             space
-             #(swap! game play space X)))
-         [game-over @game]
-         [reset-button #(reset! game new-game)]]))))
+      [:div.game
+       (let [board (:board @game)
+             spaces (sort (keys board))]
+         [:div.board
+          (map-indexed
+            (fn [index, space]
+              (board-space board space #(swap! game play space)))
+            spaces)
+          [:div
+           [game-over @game]
+           [reset-button #(reset! game new-game)]]])])))
 
 (defn mount [el]
   (rdom/render

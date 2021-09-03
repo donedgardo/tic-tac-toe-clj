@@ -21,13 +21,13 @@
       score
       (true? maximizing?)
       (->> moves
-           (map #(rules/play game % player))
+           (map #(rules/play game %))
            (map #(minimax % player (inc depth) false))
            (apply max)
            (#(- % depth)))
       :else
       (->> moves
-           (map #(rules/play game % (constants/get-opponent player)))
+           (map #(rules/play game %))
            (map #(minimax % player (inc depth) true))
            (apply min)
            (#(+ % depth))))))
@@ -46,7 +46,7 @@
         (assoc scores
           (first moves)
           (minimax
-            (rules/play game (first moves) player)
+            (rules/play game (first moves))
             player
             0
             false))))))

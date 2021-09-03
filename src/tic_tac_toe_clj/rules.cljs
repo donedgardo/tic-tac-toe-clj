@@ -1,4 +1,5 @@
-(ns tic-tac-toe-clj.rules)
+(ns tic-tac-toe-clj.rules
+  (:require [tic-tac-toe-clj.constants :refer [get-opponent]]))
 
 (defn index-empty? [index board] (nil? (board index)))
 
@@ -53,16 +54,17 @@
         true
         :else (recur (drop 1 board-indexes))))))
 
-(defn play [game index player]
+(defn play [game index]
   (let [board (:board game)
+        player (:active-player game)
         new-board (assoc board index player) ]
     (cond
       (or (:over? game)
           (not (index-empty? index board)))
       game
       (game-has-wining-play? new-board player)
-      (assoc game :board new-board  :winner player :over? true)
+      (assoc game :board new-board :winner player :over? true)
       (board-full? new-board)
       (assoc game :board new-board :over? true)
       :else
-      (assoc game :board new-board))))
+      (assoc game :board new-board :active-player (get-opponent player)))))

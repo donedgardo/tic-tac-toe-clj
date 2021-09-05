@@ -14,3 +14,16 @@
 (defn click-element [el]
   (.click rtl/fireEvent el)
   (r/flush))
+
+
+(defn label-component-in-dom? [component label]
+  (= false
+     (nil?
+       (-> component
+           (.queryByLabelText label)))))
+
+(defn expect-empty-board [component]
+  (= 9
+     (-> component
+         (.queryAllByLabelText #"empty-board-space")
+         count)))

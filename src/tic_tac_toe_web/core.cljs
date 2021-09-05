@@ -33,24 +33,47 @@
                     (str mark "-play-" space))}
      mark]))
 
-(defn tic-tac-toe-game []
+(defn player-turn [game]
+  (if (:over? game)
+    nil
+    [:p (str "Player " (:active-player game) "'s Turn!")]))
+
+(defn play-options-menu [on-back]
+  [:button {:aria-label "play-options-menu"
+            :on-click on-back} "Play Options"])
+
+(defn tic-tac-toe-board [& [on-back]]
   (let [game (atom new-game)]
     (fn []
       [:div.game
        (let [board (:board @game)
              spaces (sort (keys board))]
          [:div.board
-          (map-indexed
-            (fn [index, space]
+          (for [space spaces]
               (board-space board space #(swap! game play space)))
-            spaces)
           [:div
+           [player-turn @game]
            [game-over @game]
+           [play-options-menu on-back]
            [reset-button #(reset! game new-game)]]])])))
+
+(defn play-options []
+  (let [options (atom {:play-mode nil})]
+    (fn []
+      (cond
+        (nil? (:play-mode @options))
+        [:div
+         [:button {:aria-label "play-local-player"
+                   :on-click   #(swap! options assoc :play-mode :local)}
+          "Play Against Local Player"]
+         [:button {:aria-label "play-ai-player"}
+          "Play Against AI Player"]]
+        :else
+        [tic-tac-toe-board #(swap! options assoc :play-mode nil)]))))
 
 (defn mount [el]
   (rdom/render
-    [tic-tac-toe-game]
+    [play-options]
     el))
 
 (defn mount-app-element []

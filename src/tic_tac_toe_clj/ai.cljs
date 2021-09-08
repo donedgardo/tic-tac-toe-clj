@@ -13,6 +13,7 @@
     :else
     nil))
 
+
 (defn minimax [game player depth maximizing?]
   (let [score (score-board game player)
         moves (constants/get-empty-indexes (:board game))]
@@ -32,22 +33,25 @@
            (apply min)
            (#(+ % depth))))))
 
-(defn get-best-move [game player]
-  (loop [moves (constants/get-empty-indexes (:board game))
-         scores {}]
-    (cond
-      (= 9 (count moves))
-      (rand-nth (keys constants/empty-board))
-      (empty? moves)
-      (key (apply max-key val scores))
-      :else
-      (recur
-        (drop 1 moves)
-        (assoc scores
-          (first moves)
-          (minimax
-            (rules/play game (first moves))
-            player
-            0
-            false))))))
+(defn get-random-move [game]
+  (rand-nth (constants/get-empty-indexes (:board game))))
 
+(defn get-best-move [game]
+  (let [player (:active-player game)]
+    (loop [moves (constants/get-empty-indexes (:board game))
+           scores {}]
+      (cond
+        (= 9 (count moves))
+        (get-random-move game)
+        (empty? moves)
+        (key (apply max-key val scores))
+        :else
+        (recur
+          (drop 1 moves)
+          (assoc scores
+            (first moves)
+            (minimax
+              (rules/play game (first moves))
+              player
+              0
+              false)))))))

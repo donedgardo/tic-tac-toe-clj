@@ -1,6 +1,7 @@
 (ns ^:figwheel-hooks tic-tac-toe-web.core
   (:require
     [tic-tac-toe-clj.constants :refer [new-game X]]
+    [tic-tac-toe-clj.ai :refer [get-best-move get-random-move]]
     [tic-tac-toe-clj.rules :refer [play]]
     [goog.dom :as gdom]
     [reagent.core :as reagent :refer [atom]]
@@ -40,40 +41,97 @@
 
 (defn play-options-menu [on-back]
   [:button {:aria-label "play-options-menu"
-            :on-click on-back} "Play Options"])
+            :on-click   on-back} "Play Options"])
 
-(defn tic-tac-toe-board [& [on-back]]
-  (let [game (atom new-game)]
+(defn handle-user-play [space on-play game game-options]
+  (let [{:keys [play-mode ai-play]} game-options]
+    (cond
+      (= :ai play-mode)
+      (do
+        (on-play space)
+        (on-play (ai-play (play game space))))
+      :else
+      (on-play space))))
+
+
+(defn tic-tac-toe-board [& [on-back options]]
+  (let [{:keys [first-player play-mode ai-play]} options
+        game (if
+               (and (= :ai play-mode)
+                    (= :ai first-player))
+               (atom (play new-game (ai-play new-game)))
+               (atom new-game))
+        on-play #(swap! game play %)]
     (fn []
       [:div.game
        (let [board (:board @game)
              spaces (sort (keys board))]
          [:div.board
           (for [space spaces]
-              (board-space board space #(swap! game play space)))
+            (board-space board space #(handle-user-play space on-play @game options)))
           [:div
            [player-turn @game]
            [game-over @game]
-           [play-options-menu on-back]
-           [reset-button #(reset! game new-game)]]])])))
+           [reset-button #(reset! game new-game)]
+           [play-options-menu on-back]]])])))
 
-(defn play-options []
-  (let [options (atom {:play-mode nil})]
+(defn menu-option [title options on-select]
+  [:div
+   [:h2 title]
+   (for [{:keys [label value aria-label]} options]
+     [:button
+      {:aria-label aria-label
+       :on-click   #(on-select value)} label])])
+
+(defn difficulty-ai-menu [on-select]
+  [menu-option "Select AI difficulty"
+   [{:label      "EASY"
+     :value      get-random-move
+     :aria-label "easy-ai-difficulty"}
+    {:label      "HARD"
+     :value      get-best-move
+     :aria-label "hard-ai-difficulty"}]
+   on-select])
+
+(defn play-mode-menu [on-select]
+  [menu-option "Select Play Mode!"
+   [{:label      "Play Against Local Player"
+     :aria-label "play-local-player"
+     :value      :local}
+    {:label      "Play Against AI Player"
+     :aria-label "play-ai-player"
+     :value      :ai}]
+   on-select])
+
+(defn goes-first-menu [on-select]
+  [menu-option "Who Goes First?"
+   [{:label      "I Go First!"
+     :aria-label "player-goes-first"
+     :value      :player}
+    {:label      "AI Goes First!"
+     :aria-label "ai-goes-first"
+     :value      :ai}]
+   on-select])
+
+(defn play-menu []
+  (let [options (atom {:play-mode nil :ai-play nil :first-player nil})
+        go-back-to-menu #(swap! options assoc :play-mode nil :ai-play nil :first-player nil)]
     (fn []
       (cond
         (nil? (:play-mode @options))
-        [:div
-         [:button {:aria-label "play-local-player"
-                   :on-click   #(swap! options assoc :play-mode :local)}
-          "Play Against Local Player"]
-         [:button {:aria-label "play-ai-player"}
-          "Play Against AI Player"]]
+        [play-mode-menu #(swap! options assoc :play-mode %)]
+        (and (= :ai (:play-mode @options))
+             (nil? (:ai-play @options)))
+        [difficulty-ai-menu #(swap! options assoc :ai-play %)]
+        (and (= :ai (:play-mode @options))
+             (nil? (:first-player @options)))
+        [goes-first-menu #(swap! options assoc :first-player %)]
         :else
-        [tic-tac-toe-board #(swap! options assoc :play-mode nil)]))))
+        [tic-tac-toe-board go-back-to-menu @options]))))
 
 (defn mount [el]
   (rdom/render
-    [play-options]
+    [play-menu]
     el))
 
 (defn mount-app-element []

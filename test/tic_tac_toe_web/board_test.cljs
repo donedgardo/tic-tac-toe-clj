@@ -1,7 +1,7 @@
 (ns tic-tac-toe-web.board-test
   (:require
-    [tic-tac-toe-clj.constants :refer [new-game X]]
-    [tic-tac-toe-clj.rules :refer [play]]
+    [tic-tac-toe-core.constants :refer [new-game X]]
+    [tic-tac-toe-core.rules :refer [play]]
     [tic-tac-toe-web.core :refer [tic-tac-toe-board]]
     [cljs.test :refer-macros [deftest is testing use-fixtures]]
     ["@testing-library/react" :as rtl]

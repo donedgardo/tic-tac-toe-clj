@@ -1,8 +1,8 @@
 (ns ^:figwheel-hooks tic-tac-toe-web.core
   (:require
-    [tic-tac-toe-clj.constants :refer [new-game X]]
-    [tic-tac-toe-clj.ai :refer [get-best-move get-random-move]]
-    [tic-tac-toe-clj.rules :refer [play]]
+    [tic-tac-toe-core.constants :refer [new-game X]]
+    [tic-tac-toe-core.ai :refer [get-best-move get-random-move]]
+    [tic-tac-toe-core.rules :refer [play]]
     [goog.dom :as gdom]
     [reagent.core :as reagent :refer [atom]]
     [reagent.dom :as rdom]))

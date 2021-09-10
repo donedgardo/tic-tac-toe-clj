@@ -1,5 +1,5 @@
-(ns tic-tac-toe-clj.rules
-  (:require [tic-tac-toe-clj.constants :refer [get-opponent]]))
+(ns tic-tac-toe-core.rules
+  (:require [tic-tac-toe-core.constants :refer [get-opponent]]))
 
 (defn index-empty? [index board] (nil? (board index)))
 

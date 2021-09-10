@@ -2,6 +2,7 @@
 (ns tic-tac-toe-web.test-runner
   (:require
     ;; require all the namespaces that you want to test
+    [tic-tac-toe-core.ai-spec]
     [tic-tac-toe-web.core-test]
     [tic-tac-toe-web.game-over-test]
     [tic-tac-toe-web.play-options-test]

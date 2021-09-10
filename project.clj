@@ -17,9 +17,14 @@
             "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]
             "fig:test"  ["trampoline" "run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "tic-tac-toe-web.test-runner"]}
 
+
   :profiles {:dev {:dependencies   [[com.bhauman/figwheel-main "0.2.12"]
-                                    [com.bhauman/rebel-readline-cljs "0.1.4"]]
+                                    [com.bhauman/rebel-readline-cljs "0.1.4"]
+                                    [speclj "3.3.2"]]
                    :resource-paths ["target"]
                    ;; need to add the compiled assets to the :clean-targets
-                   :clean-targets  ^{:protect false} ["target"]}})
+                   :clean-targets  ^{:protect false} ["target"]}}
+  :plugins [[speclj "3.3.2"]]
+  :test-paths ["test"])
+
 

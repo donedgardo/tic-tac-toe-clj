@@ -1,4 +1,4 @@
-(ns tic-tac-toe-clj.constants)
+(ns tic-tac-toe-core.constants)
 
 (def empty-board
   {[0 0] nil [0 1] nil [0 2] nil

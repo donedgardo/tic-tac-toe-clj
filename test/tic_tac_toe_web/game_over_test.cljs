@@ -18,7 +18,7 @@
         (is
           (nil?
              (-> component
-                 (.queryByText "Game Over!")))))))
+                 (.queryByText "Cats Game!")))))))
 
   (testing "It should say Game over."
     (with-mounted-component
@@ -26,7 +26,7 @@
       (fn [component]
         (is
           (not (nil? (-> component
-                         (.queryByText "Game Over!")
+                         (.queryByText "Cats Game!")
                          (.-innerHTML))))))))
 
   (testing "It should display the winner"

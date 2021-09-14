@@ -54,17 +54,26 @@
         true
         :else (recur (drop 1 board-indexes))))))
 
+(defn invalid-move? [game index]
+  (or (:over? game)
+      (not (index-empty? index (:board game)))))
+
 (defn play [game index]
-  (let [board (:board game)
-        player (:active-player game)
-        new-board (assoc board index player) ]
+  (let [{:keys [board active-player ai-play]} game
+        new-board (assoc board index active-player)
+        new-game (assoc game :board new-board)
+        opponent (get-opponent active-player)]
     (cond
-      (or (:over? game)
-          (not (index-empty? index board)))
+      (invalid-move? game index)
       game
-      (game-has-wining-play? new-board player)
-      (assoc game :board new-board :winner player :over? true)
+      (game-has-wining-play? new-board active-player)
+      (assoc new-game :winner active-player :over? true)
       (board-full? new-board)
-      (assoc game :board new-board :over? true)
+      (assoc new-game :over? true)
+      (nil? ai-play)
+      (assoc new-game :active-player opponent)
       :else
-      (assoc game :board new-board :active-player (get-opponent player)))))
+      (let [ai-disabled-game (assoc new-game :ai-play nil :active-player opponent)
+            ai-move (ai-play ai-disabled-game)
+            game-after-ai (play ai-disabled-game ai-move)]
+        (assoc game-after-ai :ai-play ai-play)))))

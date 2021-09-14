@@ -2,6 +2,8 @@
   (:require
     [clojure.string :refer [blank?]]
     [tic-tac-toe-core.ai :refer :all]
+    [tic-tac-toe-core.intl :refer :all]
+    [tic-tac-toe-core.core :refer :all]
     [tic-tac-toe-core.constants :refer :all]
     [tic-tac-toe-core.rules :refer :all]))
 
@@ -89,53 +91,34 @@
         (recur msg board))
       index)))
 
-(defn play-cli
-  ([]
-   (loop [game new-game]
-     (let [board (:board game)
-           winner (:winner game)
-           empty-inputs (get-empty-inputs board)
-           player (:active-player game)]
-       (println (print-board board))
-       (cond
-         (not (nil? winner))
-         (println (str "Game Over! " winner " won!"))
-         (:over? game)
-         (println "Game Over!")
-         :else
-         (recur
-           (play
-             game
-             (get-player-input
-               (str
-                 "\nAvailable Inputs: "
-                 (pr-str empty-inputs)
-                 "\n" player "s turn.\n"
-                 "Enter " player "s Input: ")
-               board)))))))
-  ([ai]
-   (loop [game new-game]
-     (let [board (:board game)
-           winner (:winner game)
-           player (:active-player game)]
-       (println (print-board board))
-       (cond
-         (not (nil? winner))
-         (println (str "Game Over! " winner " won!"))
-         (:over? game)
-         (println "Game Over!")
-         :else
-         (recur
-           (play
-             game
-             (if (= player X)
-               (get-player-input
-                 (str
-                   "\nValid Inputs: "
-                   (pr-str (get-empty-inputs board))
-                   "\n" player "s turn.\n"
-                   "Enter " player "s Input: ")
-                 board)
-               (get-best-move game)))))))))
+(defn play-cli [& [options]]
+  (loop [game (create-game options)]
+    (let [board (:board game)
+          winner (:winner game)
+          empty-inputs (get-empty-inputs board)
+          player (:active-player game)]
+      (println (print-board board))
+      (cond
+        (not (nil? winner))
+        (do
+          (println (get-winner-announcement winner))
+          winner)
+        (:over? game)
+        (do
+          (println (:cats-game-label INTL))
+          nil)
+        :else
+        (recur
+          (play
+            game
+            (get-player-input
+              (str
+                "\nAvailable Inputs: \n"
+                (pr-str empty-inputs)
+                "\n"
+                (get-player-turn-label player)
+                "\n"
+                "Enter " player "s Input: ")
+              board)))))))
 
 ;(play-cli)

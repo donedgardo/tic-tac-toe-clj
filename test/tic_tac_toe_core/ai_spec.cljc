@@ -107,7 +107,7 @@
           (it "should return best move when it goes second"
             (should= [1 1] (time (get-best-move
                                    (-> new-game
-                                       (play [0 0])))))))
+                                       (play [0 2])))))))
 
 (describe "obvious move"
           (it "should be quick"

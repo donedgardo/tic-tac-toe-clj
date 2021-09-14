@@ -12,10 +12,13 @@
   {:board empty-board
    :winner nil
    :over? false
-   :active-player X})
+   :active-player X
+   :ai-play nil})
 
 
 (def player-symbols [X O])
+
+(def default-game-options {:play-mode nil :ai-play nil :first-player nil})
 
 (defn get-opponent [player]
   (->> player-symbols

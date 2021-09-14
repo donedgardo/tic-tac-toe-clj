@@ -52,3 +52,20 @@
           (it "returns when the input is empty"
             (should= "\nEmpty space is not valid input."
                      (get-error-message nil (:board new-game) "   "))))
+
+(describe "local play"
+          (it "plays a cats game"
+            (should= nil
+                     (with-in-str
+                       "1\n2\n3\n5\n4\n6\n9\n7\n8"
+                       (play-cli))))
+          (it "X wins"
+            (should= X
+                     (with-in-str
+                       "1\n5\n3\n4\n2"
+                       (play-cli))))
+          (it "O wins"
+            (should= O
+                     (with-in-str
+                       "1\n5\n2\n3\n4\n7"
+                       (play-cli)))))

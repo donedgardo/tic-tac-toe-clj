@@ -4,6 +4,7 @@
     ;; require all the namespaces that you want to test
     [tic-tac-toe-core.ai-spec]
     [tic-tac-toe-web.core-test]
+    [tic-tac-toe-web.create-room-test]
     [tic-tac-toe-web.game-over-test]
     [tic-tac-toe-web.play-options-test]
     [tic-tac-toe-web.board-test]

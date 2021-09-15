@@ -7,7 +7,7 @@ pom.xml
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
-node_modules
+node_modules/
 resources/public/cljs-out/
 .repl
 .nrepl-port

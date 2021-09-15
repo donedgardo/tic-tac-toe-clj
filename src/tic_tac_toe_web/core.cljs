@@ -5,6 +5,7 @@
     [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.rules :refer [play]]
+    [tic-tac-toe-web.create-room :refer [create-room]]
     [tic-tac-toe-core.core :refer [create-game]]
     [goog.dom :as gdom]
     [reagent.core :as reagent :refer [atom]]
@@ -67,6 +68,7 @@
 
 (defn menu-option [title options on-select]
   [:div
+   [create-room]
    [:h2 title]
    (for [{:keys [label value aria-label]} options]
      [:button

@@ -4,7 +4,7 @@
             [tic-tac-toe-core.constants :refer [new-game empty-board]]))
 
 
-(defn get-ai-move [ai-difficulty]
+(defn get-ai-command [ai-difficulty]
   (cond
     (nil? ai-difficulty)
     nil
@@ -14,11 +14,11 @@
     get-best-move))
 
 
-(defn create-game
+(defn create-game-factory
   ([] new-game)
   ([options]
   (let [{:keys [ai-difficulty first-player]} options
-        ai-play (get-ai-move ai-difficulty)
+        ai-play (get-ai-command ai-difficulty)
         game (if (not (= :ai first-player))
                new-game
                (play new-game (ai-play new-game)))]

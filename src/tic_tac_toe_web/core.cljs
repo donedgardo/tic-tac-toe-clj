@@ -6,7 +6,7 @@
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.rules :refer [play]]
     [tic-tac-toe-web.create-room :refer [create-room]]
-    [tic-tac-toe-core.core :refer [create-game]]
+    [tic-tac-toe-core.core :refer [create-game-factory]]
     [goog.dom :as gdom]
     [reagent.core :as reagent :refer [atom]]
     [reagent.dom :as rdom]))
@@ -49,8 +49,8 @@
 
 (defn tic-tac-toe-board [& [on-back options]]
   (let [{:keys [first-player ai-difficulty]} options
-        new-game (create-game {:first-player  first-player
-                               :ai-difficulty ai-difficulty})
+        new-game (create-game-factory {:first-player first-player
+                               :ai-difficulty        ai-difficulty})
         game (atom new-game)
         on-play #(swap! game play %)]
     (fn []
@@ -72,7 +72,8 @@
    [:h2 title]
    (for [{:keys [label value aria-label]} options]
      [:button
-      {:aria-label aria-label
+      {:key aria-label
+       :aria-label aria-label
        :on-click   #(on-select value)} label])])
 
 (defn difficulty-ai-menu [on-select]

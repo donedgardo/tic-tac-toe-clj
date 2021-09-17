@@ -92,7 +92,7 @@
       index)))
 
 (defn play-cli [& [options]]
-  (loop [game (create-game options)]
+  (loop [game (create-game-factory options)]
     (let [board (:board game)
           winner (:winner game)
           empty-inputs (get-empty-inputs board)

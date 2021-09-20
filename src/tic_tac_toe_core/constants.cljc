@@ -18,7 +18,7 @@
 
 (def player-symbols [X O])
 
-(def default-game-options {:play-mode nil :ai-play nil :first-player nil})
+(def default-game-options {:play-mode nil :ai-play nil :first-player nil :online-mode nil})
 
 (defn get-opponent [player]
   (->> player-symbols

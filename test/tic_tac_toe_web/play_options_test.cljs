@@ -5,6 +5,7 @@
     [cljs.test :refer-macros [deftest is testing use-fixtures]]
     [tic-tac-toe-web.core-test :refer [with-mounted-component
                                        click-element
+                                       change-input
                                        expect-empty-board
                                        label-component-in-dom?]]))
 
@@ -24,6 +25,39 @@
       (fn [component]
         (is
           (label-component-in-dom? component ":ai-mode")))))
+  (testing "It should show Online VS Mode option"
+    (with-mounted-component
+      [play-menu]
+      (fn [component]
+        (is
+          (label-component-in-dom? component ":online-vs-mode")))))
+  (testing "It should create or join room options after clicking online vs moe"
+    (with-mounted-component
+      [play-menu]
+      (fn [component]
+        (click-element (.getByLabelText component ":online-vs-mode"))
+        (is
+          (label-component-in-dom? component "join-game"))
+        (is
+          (label-component-in-dom? component "host-game")))))
+  (testing "It should show an New Room Name input after clicking host game option"
+    (with-mounted-component
+      [play-menu]
+      (fn [component]
+        (click-element (.getByLabelText component ":online-vs-mode"))
+        (click-element (.getByLabelText component "host-game"))
+        (is
+          (label-component-in-dom? component "new-room-input")))))
+  (testing "It should show an Create Room button disabled after clicking host game option"
+    (with-mounted-component
+      [play-menu]
+      (fn [component]
+        (click-element (.getByLabelText component ":online-vs-mode"))
+        (click-element (.getByLabelText component "host-game"))
+        (is (= true (-> component
+                        (.queryByLabelText "create-room-button")
+                        (. -disabled)))))))
+
   (testing "It should empty board after clicking local player option"
     (with-mounted-component
       [play-menu]

@@ -7,10 +7,17 @@
 
 (def play-mode-options
   [{:label (:local-mode INTL) :value :local}
-   {:label (:ai-mode INTL) :value :ai}])
+   {:label (:ai-mode INTL) :value :ai}
+   {:label (:online-vs-mode INTL) :value :online-vs}])
 
 (def goes-first-options
   [{:label (:player-first-label INTL)
     :value :player}
    {:label (:ai-first-label INTL)
     :value :ai}])
+
+(def online-options
+  [{:label (:host-game-option INTL)
+    :value :host-game}
+   {:label (:join-game-option INTL)
+    :value :join-game}])

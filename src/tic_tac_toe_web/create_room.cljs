@@ -4,8 +4,6 @@
     [reagent.core :refer [atom]]
     [cljs.core.async.interop :refer-macros [<p!]]))
 
-
-
 (def room-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent-address nil :msg-input nil}))
 
 (defn get-peer-ids [node topic]

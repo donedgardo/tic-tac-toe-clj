@@ -15,6 +15,10 @@
   (.click rtl/fireEvent el)
   (r/flush))
 
+(defn change-input [el, value]
+  (.change rtl/fireEvent el (clj->js {:target {:value value}}))
+  (r/flush))
+
 
 (defn label-component-in-dom? [component label]
   (= false

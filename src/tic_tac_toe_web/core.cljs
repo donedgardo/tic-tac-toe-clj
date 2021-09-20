@@ -2,7 +2,7 @@
   (:require
     [tic-tac-toe-core.constants :refer [X default-game-options]]
     [tic-tac-toe-core.ai :refer [get-best-move get-random-move]]
-    [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options]]
+    [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options online-options]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.rules :refer [play]]
     [tic-tac-toe-web.create-room :refer [create-room]]
@@ -49,8 +49,8 @@
 
 (defn tic-tac-toe-board [& [on-back options]]
   (let [{:keys [first-player ai-difficulty]} options
-        new-game (create-game-factory {:first-player first-player
-                               :ai-difficulty        ai-difficulty})
+        new-game (create-game-factory {:first-player  first-player
+                                       :ai-difficulty ai-difficulty})
         game (atom new-game)
         on-play #(swap! game play %)]
     (fn []
@@ -72,7 +72,7 @@
    [:h2 title]
    (for [{:keys [label value aria-label]} options]
      [:button
-      {:key aria-label
+      {:key        aria-label
        :aria-label aria-label
        :on-click   #(on-select value)} label])])
 
@@ -94,6 +94,25 @@
      (merge option {:aria-label (str (:value option) "-goes-first")}))
    on-select])
 
+(defn online-vs-menu [on-select]
+  [menu-option (:online-options-title INTL)
+   (for [option online-options]
+     (merge option {:aria-label (:value option)}))
+   on-select])
+
+(defn create-room-form []
+  (let [room-name (atom "")]
+    (fn []
+      [:div
+       [:label (:create-room-name-label INTL)]
+       [:input {:aria-label "new-room-input"
+                :type "text"
+                :value @room-name
+                :on-change #(reset! room-name (-> % .-target .-value))}]
+       [:button {:aria-label "create-room-button"
+                 :disabled   (= "" @room-name)}
+        (:create-room-button INTL)]])))
+
 (defn play-menu []
   (let [options (atom default-game-options)
         go-back-to-menu #(reset! options default-game-options)]
@@ -107,6 +126,12 @@
         (and (= :ai (:play-mode @options))
              (nil? (:first-player @options)))
         [goes-first-menu #(swap! options assoc :first-player %)]
+        (and (= :online-vs (:play-mode @options))
+             (nil? (:online-mode @options)))
+        [online-vs-menu #(swap! options assoc :online-mode %)]
+        (and (= :online-vs (:play-mode @options))
+             (= :host-game (:online-mode @options)))
+        [create-room-form]
         :else
         [tic-tac-toe-board go-back-to-menu @options]))))
 

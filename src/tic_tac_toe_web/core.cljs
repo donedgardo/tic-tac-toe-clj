@@ -100,7 +100,7 @@
      (merge option {:aria-label (:value option)}))
    on-select])
 
-(defn create-room-form []
+(defn create-room-form [on-create]
   (let [room-name (atom "")]
     (fn []
       [:div
@@ -110,34 +110,50 @@
                 :value @room-name
                 :on-change #(reset! room-name (-> % .-target .-value))}]
        [:button {:aria-label "create-room-button"
-                 :disabled   (= "" @room-name)}
+                 :disabled   (= "" @room-name)
+                 :on-click on-create}
         (:create-room-button INTL)]])))
 
-(defn play-menu []
+(defn loading-room [room-id]
+  [:div {:aria-label "loading-room"}
+   [:p "Waiting on opponent to join game"]
+   [:p {:aria-label "room-id"} (str "Share this address with your opponent " room-id)]])
+
+
+(defn play-menu-factory []
   (let [options (atom default-game-options)
         go-back-to-menu #(reset! options default-game-options)]
     (fn []
-      (cond
-        (nil? (:play-mode @options))
-        [play-mode-menu #(swap! options assoc :play-mode %)]
-        (and (= :ai (:play-mode @options))
-             (nil? (:ai-difficulty @options)))
-        [difficulty-ai-menu #(swap! options assoc :ai-difficulty %)]
-        (and (= :ai (:play-mode @options))
-             (nil? (:first-player @options)))
-        [goes-first-menu #(swap! options assoc :first-player %)]
-        (and (= :online-vs (:play-mode @options))
-             (nil? (:online-mode @options)))
-        [online-vs-menu #(swap! options assoc :online-mode %)]
-        (and (= :online-vs (:play-mode @options))
-             (= :host-game (:online-mode @options)))
-        [create-room-form]
-        :else
-        [tic-tac-toe-board go-back-to-menu @options]))))
+      (let [{:keys [play-mode ai-difficulty first-player online-mode room-id] } @options
+            ai-mode? (= :ai play-mode)
+            online-mode? (= :online-vs play-mode)
+            hosting-game? (= :host-game online-mode)]
+        (cond
+          (nil? (:play-mode @options))
+          [play-mode-menu #(swap! options assoc :play-mode %)]
+          (and ai-mode?
+               (nil? ai-difficulty))
+          [difficulty-ai-menu #(swap! options assoc :ai-difficulty %)]
+          (and ai-mode?
+               (nil? first-player))
+          [goes-first-menu #(swap! options assoc :first-player %)]
+          (and online-mode?
+               (nil? online-mode))
+          [online-vs-menu #(swap! options assoc :online-mode %)]
+          (and online-mode?
+               hosting-game?
+               (nil? room-id))
+          [create-room-form #(swap! options assoc :room-id %)]
+          (and online-mode?
+               hosting-game?
+               (not (nil? room-id)))
+          [loading-room room-id]
+          :else
+          [tic-tac-toe-board go-back-to-menu @options])))))
 
 (defn mount [el]
   (rdom/render
-    [play-menu]
+    [play-menu-factory]
     el))
 
 (defn mount-app-element []

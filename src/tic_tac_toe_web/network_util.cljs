@@ -1,4 +1,4 @@
-(ns ^:figwheel-hooks tic-tac-toe-web.create-room
+(ns ^:figwheel-hooks tic-tac-toe-web.network-util
   (:require
     [cljs.core.async :refer [go]]
     [reagent.core :refer [atom]]
@@ -19,32 +19,34 @@
                      })))
 
 
-(defn connect-to-peer [multiaddr]
-  (. (. (:node @room-state) -swarm) (connect multiaddr)))
+(defn connect-to-peer [node multiaddr]
+  (. (. node -swarm) (connect multiaddr)))
 
 (defn subscribe-to-topic [node topic handle-message]
   (. (. node -pubsub) (subscribe topic handle-message)))
 
-(defn publish-msg [topic msg]
-  (. (. (:node @room-state) -pubsub) (publish topic msg)))
+(defn publish-msg [node topic msg]
+  (. (. node -pubsub) (publish topic msg)))
 
 (defn log-messages [msg]
   (js/console.log (. (. msg -data) (toString))))
 
-(defn create-ipfs-room [topic]
+(defn get-my-addresses [id]
+  (map #(.toString %) (. id -addresses)))
+
+(defn create-ipfs-util [topic handle-messages]
   (go
     (let [node (<p! (create-ipfs-node))
-          my-addresses (map #(.toString %) (. (<p! (.id node)) -addresses))
-          handleMessage log-messages
-          subscription (<p! (subscribe-to-topic node topic handleMessage))
+          my-addresses (get-my-addresses (<p! (.id node)))
+          subscription (<p! (subscribe-to-topic node topic handle-messages))
           interval (js/setInterval #(do
                                       (go
                                         (let [peer-ids (<p! (get-peer-ids node topic))]
                                           (swap! room-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids))))
                                    3000)]
-      nil)))
+      node)))
 
-(defn connect-to-peer-form []
+(defn connect-to-peer-form [node address]
   (fn []
     [:div
      [:label "Opponents Address"]
@@ -52,7 +54,7 @@
               :value       (:opponent-address @room-state)
               :on-change   #(swap! room-state assoc :opponent-address (-> % .-target .-value))
               :placeholder "Opponents Address"}]
-     [:button {:on-click #(connect-to-peer (:opponent-address @room-state))} "Connect to Opponent"]]))
+     [:button {:on-click #(connect-to-peer node address)} "Connect to Opponent"]]))
 
 (defn send-msg-form [topic]
   (fn []
@@ -62,11 +64,16 @@
               :value       (:msg-input @room-state)
               :on-change   #(swap! room-state assoc :msg-input (-> % .-target .-value))
               :placeholder "Chat..."}]
-     [:button {:on-click #(publish-msg topic (:msg-input @room-state))} "Send Message"]]))
+     [:button {:on-click #(publish-msg (:node @room-state) topic (:msg-input @room-state))} "Send Message"]]))
 
-(defn create-room []
+(defn peers-list [peer-ids]
+  [:ul
+   (for [peer peer-ids]
+     [:li {:key peer} peer])])
+
+(defn network-utils []
   (let [topic "clean-tic-tac-toe"
-        create-room (create-ipfs-room topic)]
+        node (create-ipfs-util topic log-messages)]
     (fn []
       [:div
        [:div "My Address: "
@@ -74,9 +81,7 @@
          (for [address (:my-addresses @room-state)]
            [:li {:key address} address])]
         [:div "Connected Peers: "
-         [:ul
-          (for [peer-id (:peer-ids @room-state)]
-            [:li {:key peer-id} peer-id])]
-         [:div [connect-to-peer-form]]
+         [peers-list (:peer-ids @room-state)]
+         [:div [connect-to-peer-form node (:opponent-address @room-state)]]
          [:div [(send-msg-form topic)]]]]])))
 

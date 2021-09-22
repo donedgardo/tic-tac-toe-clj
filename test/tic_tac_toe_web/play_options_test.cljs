@@ -86,16 +86,6 @@
         (click-element (.queryByLabelText component "create-room-button"))
         (is
           (label-component-in-dom? component "loading-room")))))
-  (testing "It should room-id after host creates a room"
-    (with-mounted-component
-      [create-game]
-      (fn [component]
-        (click-element (.getByLabelText component ":online-vs-mode"))
-        (click-element (.getByLabelText component "host-game"))
-        (change-input (.getByLabelText component "new-room-input") "room")
-        (click-element (.queryByLabelText component "create-room-button"))
-        (is
-          (label-component-in-dom? component "room-id")))))
   (testing "It should empty board after clicking local player option"
     (with-mounted-component
       [create-game]

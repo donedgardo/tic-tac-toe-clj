@@ -14,11 +14,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Initialize App
-(def selected-page (atom join-game-page))
+(def selected-page (atom home-page))
 
 (defn page []
   [@selected-page])
-
 
 ;; -------------------------
 ;; History
@@ -38,8 +37,12 @@
   (secretary/set-config! :prefix "#")
   (secretary/defroute "/" []
                       (reset! selected-page home-page))
-  (secretary/defroute "/join-game/:address/:room-name" [address room-name]
-                      (reset! selected-page #(join-game-page address room-name))))
+  (secretary/defroute "/#join-game/:room" [room query-params]
+                      ;(js/console.log (pr-str query-params))))
+                      (reset! selected-page
+                              #(join-game-page
+                                 (:address query-params)
+                                 room))))
 
 
 ;; -------------------------
@@ -52,13 +55,13 @@
   (accountant/configure-navigation!
     {:nav-handler
      (fn [path]
+       (js/console.log path)
        (secretary/dispatch! path))
      :path-exists?
      (fn [path]
        (secretary/locate-route path))})
   (accountant/dispatch-current!)
   (mount-root))
-
 
 (defn ^:export main []
   (app-routes)
@@ -68,7 +71,6 @@
 
 ;; specify reload hook with ^;after-load metadata
 (defn ^:after-load on-reload []
-  (secretary/dispatch! "/join-game/23")
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)

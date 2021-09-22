@@ -4,13 +4,12 @@
     [tic-tac-toe-core.constants :refer [default-game-options]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options online-options]]
-    [tic-tac-toe-web.create-room :refer [create-room]]
+    [tic-tac-toe-web.host-room :refer [host-game]]
     [tic-tac-toe-web.board :refer [tic-tac-toe-board]]
     ))
 
 (defn menu-option [title options on-select]
   [:div
-   [create-room]
    [:h2 title]
    (for [{:keys [label value aria-label]} options]
      [:button
@@ -54,13 +53,9 @@
                 :on-change  #(reset! room-name (-> % .-target .-value))}]
        [:button {:aria-label "create-room-button"
                  :disabled   (= "" @room-name)
-                 :on-click   on-create}
+                 :on-click   #(on-create @room-name)}
         (:create-room-button INTL)]])))
 
-(defn loading-room [room-id]
-  [:div {:aria-label "loading-room"}
-   [:p "Waiting on opponent to join game"]
-   [:p {:aria-label "room-id"} (str "Share this address with your opponent " room-id)]])
 
 (defn create-game []
   (let [options (atom default-game-options)
@@ -89,6 +84,6 @@
           (and online-mode?
                hosting-game?
                (not (nil? room-id)))
-          [loading-room room-id]
+          [host-game room-id go-back-to-menu]
           :else
           [tic-tac-toe-board go-back-to-menu @options])))))

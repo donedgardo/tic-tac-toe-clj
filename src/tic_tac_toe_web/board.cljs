@@ -2,6 +2,7 @@
   (:require
     [reagent.core :as reagent :refer [atom]]
     [tic-tac-toe-core.core :refer [create-game-factory]]
+    [tic-tac-toe-web.network-util :refer [subscribe-to-topic]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.rules :refer [play]]
     ))
@@ -40,18 +41,32 @@
             :on-click   on-back} "Play Options"])
 
 (defn tic-tac-toe-board [& [on-back options]]
-  (let [{:keys [first-player ai-difficulty]} options
+  (let [{:keys [first-player ai-difficulty online]} options
         new-game (create-game-factory {:first-player  first-player
                                        :ai-difficulty ai-difficulty})
         game (atom new-game)
-        on-play #(swap! game play %)]
+        subscription (if (not (nil? online))
+                       (subscribe-to-topic
+                         (:node online)
+                         (:room-id online)
+                         (fn [msg]
+                           (let [space (js->clj (js/JSON.parse (. (. msg -data) (toString))))]
+                             (js/console.log "subscription" (clj->js space))
+                             (swap! game play space)))))
+        handle-play (fn [space]
+                      (if (nil? online)
+                        (swap! game play space)
+                          (if (= (:active-player @game) (:player online))
+                            (do
+                              (swap! game play space)
+                              ((:play online) space)))))]
     (fn []
       [:div.game
        (let [board (:board @game)
              spaces (sort (keys board))]
          [:div.board
           (for [space spaces]
-            (board-space board space #(on-play space)))
+            (board-space board space #(handle-play space)))
           [:div
            [player-turn @game]
            [game-over @game]

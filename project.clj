@@ -9,6 +9,8 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.773"]
                  [org.clojure/core.async "1.3.618"]
+                 [clj-commons/secretary "1.2.5-SNAPSHOT"]
+                 [venantius/accountant "0.2.4"]
                  [reagent "0.10.0" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]]
 
   :source-paths ["src"]

@@ -2,7 +2,7 @@
   (:require
     [tic-tac-toe-core.constants :refer [new-game X]]
     [tic-tac-toe-core.rules :refer [play]]
-    [tic-tac-toe-web.core :refer [tic-tac-toe-board]]
+    [tic-tac-toe-web.board :refer [tic-tac-toe-board]]
     [cljs.test :refer-macros [deftest is testing use-fixtures]]
     ["@testing-library/react" :as rtl]
     [reagent.core :as r :refer [atom]]

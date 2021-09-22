@@ -11,5 +11,5 @@
 (defn home-page [ratom]
   [create-game])
 
-(defn join-game-page [ratom]
-  [join-game "test" "test"])
+(defn join-game-page [address room-name]
+  [join-game address room-name])

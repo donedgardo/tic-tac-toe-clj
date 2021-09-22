@@ -38,8 +38,8 @@
   (secretary/set-config! :prefix "#")
   (secretary/defroute "/" []
                       (reset! selected-page home-page))
-  (secretary/defroute "/join-game/:address" {:as params}
-                      (reset! selected-page join-game-page)))
+  (secretary/defroute "/join-game/:address/:room-name" [address room-name]
+                      (reset! selected-page #(join-game-page address room-name))))
 
 
 ;; -------------------------
@@ -52,7 +52,6 @@
   (accountant/configure-navigation!
     {:nav-handler
      (fn [path]
-       (js/console.log "Hello" path)
        (secretary/dispatch! path))
      :path-exists?
      (fn [path]

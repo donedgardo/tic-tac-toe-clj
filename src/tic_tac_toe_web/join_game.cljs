@@ -33,18 +33,20 @@
                  (on-join node peer-ids))))
           2000)))))
 
+(defn handle-join [network-state node peer-ids]
+  (cond
+    (empty? peer-ids)
+    (swap! network-state assoc :node node :peer-ids [] :opponent nil)
+    (nil? (:opponent @network-state))
+    (swap! network-state assoc :node node :peer-ids peer-ids :opponent (first peer-ids))
+    :else
+    (swap! network-state assoc :node node :peer-ids peer-ids)))
+
 (defn join-game [peer-address room-id]
   (let [network-state (atom {:node nil :peer-ids [] :opponent nil})
         on-play #(handle-play (:node @network-state) room-id %)
         on-reset #(handle-reset (:node @network-state) room-id)
-        on-join (fn [node peer-ids]
-                  (cond
-                    (empty? peer-ids)
-                    (swap! network-state assoc :node node :peer-ids [] :opponent nil)
-                    (nil? (:opponent @network-state))
-                    (swap! network-state assoc :node node :peer-ids peer-ids :opponent (first peer-ids))
-                    :else
-                    (swap! network-state assoc :node node :peer-ids peer-ids)))
+        on-join #(handle-join network-state %1 %2)
         thing (join-room peer-address room-id on-join)]
     (reagent/create-class
       {:display-name

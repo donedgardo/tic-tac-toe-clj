@@ -17,18 +17,21 @@
              subscribe-to-topic
              publish-msg]]))
 
+(defonce interval (atom 0))
+
 (defn join-room [peer-address room-name on-join]
   (go
     (let [node (<p! (create-ipfs-node))
           peer-connection (<p! (connect-to-peer node peer-address))
           subscription (<p! (subscribe-to-topic node room-name log-messages))]
-      (js/setInterval
-        #(do
-           (go
-             (let [peer-ids (<p! (get-peer-ids node room-name))]
-               (on-join node peer-ids))))
-        2000))))
-
+      (reset!
+        interval
+        (js/setInterval
+          #(do
+             (go
+               (let [peer-ids (<p! (get-peer-ids node room-name))]
+                 (on-join node peer-ids))))
+          2000)))))
 
 (defn join-game [peer-address room-id]
   (let [network-state (atom {:node nil :peer-ids [] :opponent nil})
@@ -42,13 +45,17 @@
                     (swap! network-state assoc :node node :peer-ids peer-ids :opponent (first peer-ids))
                     :else
                     (swap! network-state assoc :node node :peer-ids peer-ids)))
-        interval (join-room peer-address room-id on-join)]
+        thing (join-room peer-address room-id on-join)]
     (reagent/create-class
       {:display-name
        "join-game"
        :component-will-unmount
        (fn [this]
-         (go (<p! (.stop (:node @network-state)))))
+         (go
+           (try
+             (js/clearInterval @interval)
+             (<p! (.stop (:node @network-state)))
+             (<p! (. (. (:node @network-state) -pubsub) (unsubscribe room-id))))))
        :reagent-render
        (fn []
          [:div

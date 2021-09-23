@@ -50,6 +50,13 @@
         (swap! game play space)
         ((:play online) space)))))
 
+
+(defn handle-reset [online reset-game]
+  (do
+    (if (not (nil? online))
+      ((:reset online)))
+    (reset-game)))
+
 (defn tic-tac-toe-board [& [on-back options]]
   (let [{:keys [first-player ai-difficulty online]} options
         new-game (create-game-factory {:first-player  first-player
@@ -57,11 +64,6 @@
         game (atom new-game)
         handle-play #(on-play online game %)
         reset-game #(reset! game new-game)
-        on-reset (fn []
-                   (do
-                     (if (not (nil? online))
-                       ((:reset online)))
-                     (reset-game)))
         subscription (if (not (nil? online))
                        (subscribe-to-topic
                          (:node online)
@@ -77,26 +79,15 @@
                                :else
                                nil))))
                        )]
-    (reagent/create-class
-      {:display-name
-       "tic-tac-toe-board"
-       :component-will-unmount
-       (fn [this]
-         (if (not (nil? (:node online)))
-           (go
-             (try
-               (<p! (. (. (:node online) -pubsub) (unsubscribe (:room-id online))))
-               (js/clearInterval (:interval online))))))
-       :reagent-render
-       (fn []
-         [:div.game
-          (let [board (:board @game)
-                spaces (sort (keys board))]
-            [:div.board
-             (for [space spaces]
-               (board-space board space #(handle-play space)))
-             [:div
-              [player-turn @game]
-              [game-over @game]
-              [reset-button on-reset]
-              [play-options-menu on-back]]])])})))
+    (fn []
+      [:div.game
+       (let [board (:board @game)
+             spaces (sort (keys board))]
+         [:div.board
+          (for [space spaces]
+            (board-space board space #(handle-play space)))
+          [:div
+           [player-turn @game]
+           [game-over @game]
+           [reset-button #(handle-reset online reset-game)]
+           [play-options-menu on-back]]])])))

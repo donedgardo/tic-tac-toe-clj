@@ -18,16 +18,21 @@
              get-peer-ids
              peers-list]]))
 
+(defonce interval (atom 0))
+
 (defn host-room [room-name on-host]
   (go
     (let [node (<p! (create-ipfs-node))]
-      (js/setInterval
-        #(do
-           (go
-             (let [peer-ids (<p! (get-peer-ids node room-name))
-                   my-addresses (get-my-addresses (<p! (.id node)))]
-               (on-host node my-addresses peer-ids))))
-        2000))))
+      (reset!
+        interval
+        (js/setInterval
+          #(do
+             (go
+               (let [peer-ids (<p! (get-peer-ids node room-name))
+                     my-addresses (get-my-addresses (<p! (.id node)))]
+                 (on-host node my-addresses peer-ids))))
+          2000)))))
+
 
 (defn host-game [room-id go-back]
   (let [network-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent nil})
@@ -41,13 +46,17 @@
                     (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
                     :else
                     (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
-        interval (host-room room-id on-host)]
+        thing (host-room room-id on-host)]
     (reagent/create-class
       {:display-name
        "host-game"
        :component-will-unmount
        (fn [this]
-         (go (<p! (.stop (:node @network-state)))))
+         (go
+           (try
+             (js/clearInterval @interval)
+             (<p! (.stop (:node @network-state)))
+             (<p! (. (. (:node @network-state) -pubsub) (unsubscribe room-id))))))
        :reagent-render
        (fn []
          [:div {:aria-label "loading-room"}
@@ -71,5 +80,5 @@
                 :player   X
                 :node     (:node @network-state)
                 :room-id  room-id
-                :interval interval}}]])])})))
+                }}]])])})))
 

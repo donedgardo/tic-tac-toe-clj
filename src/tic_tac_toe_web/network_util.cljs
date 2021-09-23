@@ -28,6 +28,15 @@
 (defn publish-msg [node topic msg]
   (. (. node -pubsub) (publish topic msg)))
 
+(defn create-join-link [address room-id]
+  (str (.. js/window -location -href) "#join-game/" room-id "?address=" address))
+
+(defn handle-play [node room-id space]
+  (publish-msg node room-id (js/JSON.stringify (clj->js {:type "play" :board-space space }))))
+
+(defn handle-reset [node room-id]
+  (publish-msg node room-id (js/JSON.stringify (clj->js {:type "reset" }))))
+
 (defn log-messages [msg]
   (js/console.log (. (. msg -data) (toString))))
 

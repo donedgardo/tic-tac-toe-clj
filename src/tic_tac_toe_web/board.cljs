@@ -42,18 +42,20 @@
   [:button {:aria-label "play-options-menu"
             :on-click   on-back} "Play Options"])
 
+(defn on-play [online game space]
+  (if (nil? online)
+    (swap! game play space)
+    (if (= (:active-player @game) (:player online))
+      (do
+        (swap! game play space)
+        ((:play online) space)))))
+
 (defn tic-tac-toe-board [& [on-back options]]
   (let [{:keys [first-player ai-difficulty online]} options
         new-game (create-game-factory {:first-player  first-player
                                        :ai-difficulty ai-difficulty})
         game (atom new-game)
-        handle-play (fn [space]
-                      (if (nil? online)
-                        (swap! game play space)
-                        (if (= (:active-player @game) (:player online))
-                          (do
-                            (swap! game play space)
-                            ((:play online) space)))))
+        handle-play #(on-play online game %)
         reset-game #(reset! game new-game)
         on-reset (fn []
                    (do
@@ -65,7 +67,7 @@
                          (:node online)
                          (:room-id online)
                          (fn [msg]
-                           (let [payload  (js->clj (.parse js/JSON (. (. msg -data) (toString)) :keywordize-keys true))]
+                           (let [payload (js->clj (.parse js/JSON (. (. msg -data) (toString)) :keywordize-keys true))]
                              (js/console.log "payload" payload)
                              (cond
                                (= (payload "type") "reset")
@@ -84,8 +86,7 @@
            (go
              (try
                (<p! (. (. (:node online) -pubsub) (unsubscribe (:room-id online))))
-               (<p! (.stop (:node online)))
-               (catch js/Error err (js/console.log (ex-cause err)))))))
+               (js/clearInterval (:interval online))))))
        :reagent-render
        (fn []
          [:div.game

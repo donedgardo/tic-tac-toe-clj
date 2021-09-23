@@ -1,6 +1,8 @@
 (ns tic-tac-toe-web.board
   (:require
     [reagent.core :as reagent :refer [atom]]
+    [cljs.core.async :refer [go]]
+    [cljs.core.async.interop :refer-macros [<p!]]
     [tic-tac-toe-core.core :refer [create-game-factory]]
     [tic-tac-toe-web.network-util :refer [subscribe-to-topic]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
@@ -56,19 +58,31 @@
         handle-play (fn [space]
                       (if (nil? online)
                         (swap! game play space)
-                          (if (= (:active-player @game) (:player online))
-                            (do
-                              (swap! game play space)
-                              ((:play online) space)))))]
-    (fn []
-      [:div.game
-       (let [board (:board @game)
-             spaces (sort (keys board))]
-         [:div.board
-          (for [space spaces]
-            (board-space board space #(handle-play space)))
-          [:div
-           [player-turn @game]
-           [game-over @game]
-           [reset-button #(reset! game new-game)]
-           [play-options-menu on-back]]])])))
+                        (if (= (:active-player @game) (:player online))
+                          (do
+                            (swap! game play space)
+                            ((:play online) space)))))]
+    (reagent/create-class
+      {:display-name
+       "tic-tac-toe-board"
+       :component-will-unmount
+       (fn [this]
+         (if (not (nil? (:node online)))
+           (go
+             (try
+               (<p! (. (. (:node online) -pubsub) (unsubscribe (:room-id online))))
+               (<p! (.stop (:node online)))
+               (catch js/Error err (js/console.log(ex-cause err)))))))
+       :reagent-render
+       (fn []
+         [:div.game
+          (let [board (:board @game)
+                spaces (sort (keys board))]
+            [:div.board
+             (for [space spaces]
+               (board-space board space #(handle-play space)))
+             [:div
+              [player-turn @game]
+              [game-over @game]
+              [reset-button #(reset! game new-game)]
+              [play-options-menu on-back]]])])})))

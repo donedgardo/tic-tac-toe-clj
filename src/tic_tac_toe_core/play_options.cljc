@@ -18,6 +18,6 @@
 
 (def online-options
   [{:label (:host-game-option INTL)
-    :value :host-game}
-   {:label (:join-game-option INTL)
-    :value :join-game}])
+    :value :host-game}])
+   ;{:label (:join-game-option INTL)
+   ; :value :join-game}])

@@ -31,22 +31,11 @@
       (fn [component]
         (is
           (label-component-in-dom? component ":online-vs-mode")))))
-  (testing "It should create or join room options after clicking online vs moe"
+  (testing "It show create options after clicking online vs moe"
     (with-mounted-component
       [create-game]
       (fn [component]
         (click-element (.getByLabelText component ":online-vs-mode"))
-        (is
-          (label-component-in-dom? component "join-game"))
-        (is
-          (label-component-in-dom? component "host-game")))))
-  (testing "It show create or join room options after clicking online vs moe"
-    (with-mounted-component
-      [create-game]
-      (fn [component]
-        (click-element (.getByLabelText component ":online-vs-mode"))
-        (is
-          (label-component-in-dom? component "join-game"))
         (is
           (label-component-in-dom? component "host-game")))))
   (testing "It should show an New Room Name input after clicking host game option"

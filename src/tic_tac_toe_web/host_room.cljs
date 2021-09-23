@@ -47,11 +47,13 @@
   (let [network-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent nil})
         on-play #(handle-play (:node @network-state) room-id %)
         on-reset #(handle-reset (:node @network-state) room-id)
-        on-host #(handle-host network-state %1 %2 %3)
-        thing (host-room room-id on-host)]
+        on-host #(handle-host network-state %1 %2 %3)]
     (reagent/create-class
       {:display-name
        "host-game"
+       :component-did-mount
+       (fn [this]
+         (host-room room-id on-host))
        :component-will-unmount
        (fn [this]
          (go

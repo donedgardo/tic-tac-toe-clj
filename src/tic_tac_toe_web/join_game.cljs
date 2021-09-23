@@ -46,11 +46,13 @@
   (let [network-state (atom {:node nil :peer-ids [] :opponent nil})
         on-play #(handle-play (:node @network-state) room-id %)
         on-reset #(handle-reset (:node @network-state) room-id)
-        on-join #(handle-join network-state %1 %2)
-        thing (join-room peer-address room-id on-join)]
+        on-join #(handle-join network-state %1 %2)]
     (reagent/create-class
       {:display-name
        "join-game"
+       :component-did-mount
+       (fn [this]
+         (join-room peer-address room-id on-join))
        :component-will-unmount
        (fn [this]
          (go

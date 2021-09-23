@@ -12,55 +12,29 @@
              handle-play
              create-join-link
              handle-reset
+             handle-connection
              log-messages
              get-my-addresses
              subscribe-to-topic
+             unsubscribe-game
+             host-room
              get-peer-ids
              peers-list]]))
-
-(defonce interval (atom 0))
-
-(defn host-room [room-name on-host]
-  (go
-    (let [node (<p! (create-ipfs-node))]
-      (reset!
-        interval
-        (js/setInterval
-          #(do
-             (go
-               (let [peer-ids (<p! (get-peer-ids node room-name))
-                     my-addresses (get-my-addresses (<p! (.id node)))]
-                 (on-host node my-addresses peer-ids))))
-          2000)))))
-
-
-(defn handle-host [network-state node my-addresses peer-ids]
-  (cond
-    (empty? peer-ids)
-    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids [] :opponent nil)
-    (nil? (:opponent @network-state))
-    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
-    :else
-    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
 
 (defn host-game [room-id go-back]
   (let [network-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent nil})
         on-play #(handle-play (:node @network-state) room-id %)
         on-reset #(handle-reset (:node @network-state) room-id)
-        on-host #(handle-host network-state %1 %2 %3)]
+        on-host #(handle-connection network-state %1 %2 %3)]
     (reagent/create-class
       {:display-name
        "host-game"
        :component-did-mount
-       (fn [this]
+       (fn []
          (host-room room-id on-host))
        :component-will-unmount
-       (fn [this]
-         (go
-           (try
-             (js/clearInterval @interval)
-             (<p! (.stop (:node @network-state)))
-             (<p! (. (. (:node @network-state) -pubsub) (unsubscribe room-id))))))
+       (fn []
+         (unsubscribe-game (:node @network-state) room-id))
        :reagent-render
        (fn []
          [:div {:aria-label "loading-room"}
@@ -83,6 +57,5 @@
                 :reset   on-reset
                 :player  X
                 :node    (:node @network-state)
-                :room-id room-id
-                }}]])])})))
+                :room-id room-id}}]])])})))
 

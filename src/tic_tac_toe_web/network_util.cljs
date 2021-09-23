@@ -94,3 +94,49 @@
          [:div [connect-to-peer-form node (:opponent-address @room-state)]]
          [:div [(send-msg-form topic)]]]]])))
 
+(defn handle-connection [network-state node my-addresses peer-ids]
+  (cond
+    (empty? peer-ids)
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids [] :opponent nil)
+    (nil? (:opponent @network-state))
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
+    :else
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
+
+
+(defonce interval (atom 0))
+
+(defn unsubscribe-game [node room-id]
+  (go
+    (try
+      (js/clearInterval @interval)
+      (<p! (.stop node))
+      (<p! (. (. node -pubsub) (unsubscribe room-id))))))
+
+(defn join-room [peer-address room-name on-join]
+  (go
+    (let [node (<p! (create-ipfs-node))
+          peer-connection (<p! (connect-to-peer node peer-address))
+          subscription (<p! (subscribe-to-topic node room-name log-messages))]
+      (reset!
+        interval
+        (js/setInterval
+          #(do
+             (go
+               (let [peer-ids (<p! (get-peer-ids node room-name))
+                     my-addresses (get-my-addresses (<p! (.id node)))]
+                 (on-join node my-addresses peer-ids))))
+          2000)))))
+
+(defn host-room [room-name on-host]
+  (go
+    (let [node (<p! (create-ipfs-node))]
+      (reset!
+        interval
+        (js/setInterval
+          #(do
+             (go
+               (let [peer-ids (<p! (get-peer-ids node room-name))
+                     my-addresses (get-my-addresses (<p! (.id node)))]
+                 (on-host node my-addresses peer-ids))))
+          2000)))))

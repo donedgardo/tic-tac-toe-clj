@@ -34,18 +34,20 @@
           2000)))))
 
 
+(defn handle-host [network-state node my-addresses peer-ids]
+  (cond
+    (empty? peer-ids)
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids [] :opponent nil)
+    (nil? (:opponent @network-state))
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
+    :else
+    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
+
 (defn host-game [room-id go-back]
   (let [network-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent nil})
         on-play #(handle-play (:node @network-state) room-id %)
         on-reset #(handle-reset (:node @network-state) room-id)
-        on-host (fn [node my-addresses peer-ids]
-                  (cond
-                    (empty? peer-ids)
-                    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids [] :opponent nil)
-                    (nil? (:opponent @network-state))
-                    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
-                    :else
-                    (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
+        on-host #(handle-host network-state %1 %2 %3)
         thing (host-room room-id on-host)]
     (reagent/create-class
       {:display-name
@@ -75,10 +77,10 @@
              [tic-tac-toe-board
               go-back
               {:online
-               {:play     on-play
-                :reset    on-reset
-                :player   X
-                :node     (:node @network-state)
-                :room-id  room-id
+               {:play    on-play
+                :reset   on-reset
+                :player  X
+                :node    (:node @network-state)
+                :room-id room-id
                 }}]])])})))
 

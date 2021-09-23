@@ -10,6 +10,7 @@ FIXME: Write a paragraph about the library/project and highlight its goals.
 
 To get an interactive development environment run:
 
+    npm install
     lein fig:build
 
 This will auto compile and send all changes to the browser without the

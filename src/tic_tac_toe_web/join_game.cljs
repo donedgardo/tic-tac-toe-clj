@@ -15,12 +15,6 @@
              subscribe-to-topic
              publish-msg]]))
 
-(def join-msg
-  (js/JSON.stringify (clj->js {:type "join"})))
-
-(defn publish-join-msg [node room-name]
-  (publish-msg node room-name join-msg))
-
 (defn join-room [peer-address room-name on-join]
   (go
     (let [node (<p! (create-ipfs-node))
@@ -45,7 +39,8 @@
                     :else
                     (swap! network-state assoc :node node :peer-ids peer-ids)))
         interval (join-room peer-address room-id on-join)
-        on-play #(publish-msg (:node @network-state) room-id (js/JSON.stringify (clj->js %)))]
+        on-play #(publish-msg (:node @network-state) room-id (js/JSON.stringify (clj->js {:type "play" :board-space % })))
+        on-reset #(publish-msg (:node @network-state) room-id (js/JSON.stringify (clj->js {:type "reset" })))]
     (fn []
       [:div
        ;; joining room
@@ -54,5 +49,5 @@
          (nil? (:opponent @network-state))
          [:p {:aria-label "join-room-loading"} "Joining Room..."]
          :else
-         [tic-tac-toe-board #(%) {:online {:play on-play :player O :node (:node @network-state) :room-id room-id }}]
+         [tic-tac-toe-board #(%) {:online {:play on-play :reset on-reset :player O :node (:node @network-state) :room-id room-id }}]
          )])))

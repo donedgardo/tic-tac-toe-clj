@@ -47,21 +47,34 @@
         new-game (create-game-factory {:first-player  first-player
                                        :ai-difficulty ai-difficulty})
         game (atom new-game)
-        subscription (if (not (nil? online))
-                       (subscribe-to-topic
-                         (:node online)
-                         (:room-id online)
-                         (fn [msg]
-                           (let [space (js->clj (js/JSON.parse (. (. msg -data) (toString))))]
-                             (js/console.log "subscription" (clj->js space))
-                             (swap! game play space)))))
         handle-play (fn [space]
                       (if (nil? online)
                         (swap! game play space)
                         (if (= (:active-player @game) (:player online))
                           (do
                             (swap! game play space)
-                            ((:play online) space)))))]
+                            ((:play online) space)))))
+        reset-game #(reset! game new-game)
+        on-reset (fn []
+                   (do
+                     (if (not (nil? online))
+                       ((:reset online)))
+                     (reset-game)))
+        subscription (if (not (nil? online))
+                       (subscribe-to-topic
+                         (:node online)
+                         (:room-id online)
+                         (fn [msg]
+                           (let [payload  (js->clj (.parse js/JSON (. (. msg -data) (toString)) :keywordize-keys true))]
+                             (js/console.log "payload" payload)
+                             (cond
+                               (= (payload "type") "reset")
+                               (reset-game)
+                               (= (payload "type") "play")
+                               (swap! game play (payload "board-space"))
+                               :else
+                               nil))))
+                       )]
     (reagent/create-class
       {:display-name
        "tic-tac-toe-board"
@@ -72,7 +85,7 @@
              (try
                (<p! (. (. (:node online) -pubsub) (unsubscribe (:room-id online))))
                (<p! (.stop (:node online)))
-               (catch js/Error err (js/console.log(ex-cause err)))))))
+               (catch js/Error err (js/console.log (ex-cause err)))))))
        :reagent-render
        (fn []
          [:div.game
@@ -84,5 +97,5 @@
              [:div
               [player-turn @game]
               [game-over @game]
-              [reset-button #(reset! game new-game)]
+              [reset-button on-reset]
               [play-options-menu on-back]]])])})))

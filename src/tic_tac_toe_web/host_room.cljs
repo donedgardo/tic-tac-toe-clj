@@ -28,19 +28,26 @@
 (defn create-join-link [address room-id]
   (str (.. js/window -location -href) "#join-game/" room-id "?address=" address))
 
+(defn handle-play [node room-id space]
+  (publish-msg node room-id (js/JSON.stringify (clj->js {:type "play" :board-space space }))))
+
+(defn handle-reset [node room-id]
+  (publish-msg node room-id (js/JSON.stringify (clj->js {:type "reset" }))))
+
 (defn host-game [room-id go-back]
   (let [network-state (atom {:node nil :my-addresses [] :peer-ids [] :opponent nil})
         on-host (fn [node my-addresses peer-ids]
                   (cond
-                    (= 0 (count peer-ids))
+                    (empty? peer-ids)
                     (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids [] :opponent nil)
                     (nil? (:opponent @network-state))
                     (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids :opponent (first peer-ids))
                     :else
                     (swap! network-state assoc :node node :my-addresses my-addresses :peer-ids peer-ids)))
         internal (host-room room-id on-host)
-        on-play #(publish-msg (:node @network-state) room-id (js/JSON.stringify (clj->js %)))]
-    (fn []
+        on-play #(handle-play (:node @network-state) room-id %)
+        on-reset #(handle-reset (:node @network-state) room-id)]
+(fn []
       [:div {:aria-label "loading-room"}
        ;; Wait to create room
        (cond
@@ -55,6 +62,6 @@
           [:span (create-join-link (first (:my-addresses @network-state)) room-id)]]
          :else
          [:div "Game on"
-          [tic-tac-toe-board go-back {:online {:play on-play :player X :node (:node @network-state) :room-id room-id}}]]
+          [tic-tac-toe-board go-back {:online {:play on-play :reset on-reset :player X :node (:node @network-state) :room-id room-id}}]]
          )])))
 

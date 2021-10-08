@@ -12,14 +12,16 @@
                  [org.clojure/core.async "1.3.618"]
                  [clj-commons/secretary "1.2.5-SNAPSHOT"]
                  [venantius/accountant "0.2.4"]
-                 [reagent "0.10.0" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]]
+                 [reagent "0.10.0" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
+                 [hiccup "1.0.5"]]
 
   :source-paths ["src"]
 
   :aliases {"fig"       ["trampoline" "run" "-m" "figwheel.main"]
             "fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
             "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]
-            "fig:test"  ["trampoline" "run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "tic-tac-toe-web.test-runner"]}
+            "fig:test"  ["trampoline" "run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "tic-tac-toe-web.test-runner"]
+            "server"    ["run" "-m" "tic-tac-toe-server.core/start"]}
 
 
   :profiles {:dev {:dependencies   [[com.bhauman/figwheel-main "0.2.12"]

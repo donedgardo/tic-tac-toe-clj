@@ -2,42 +2,27 @@
   (:require
     [reagent.core :as reagent :refer [atom]]
     [tic-tac-toe-core.constants :refer [default-game-options]]
+    [tic-tac-toe-html.menu-options :refer [menu-options play-mode-menu]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options online-options]]
     [tic-tac-toe-web.host-room :refer [host-game]]
-    [tic-tac-toe-web.board :refer [tic-tac-toe-board]]
-    ))
-
-(defn menu-option [title options on-select]
-  [:div
-   [:h2 title]
-   (for [{:keys [label value aria-label]} options]
-     [:button
-      {:key        aria-label
-       :aria-label aria-label
-       :on-click   #(on-select value)} label])])
+    [tic-tac-toe-web.board :refer [tic-tac-toe-board]]))
 
 
 (defn difficulty-ai-menu [on-select]
-  [menu-option (:difficulty-option-title INTL)
+  [menu-options (:difficulty-option-title INTL)
    (for [option difficulty-options]
      (merge option {:aria-label (str (:label option) "-ai-difficulty")}))
    on-select])
 
-(defn play-mode-menu [on-select]
-  [menu-option (:play-mode-options-title INTL)
-   (for [option play-mode-options]
-     (merge option {:aria-label (str (:value option) "-mode")}))
-   on-select])
-
 (defn goes-first-menu [on-select]
-  [menu-option (:goes-first-option-title INTL)
+  [menu-options (:goes-first-option-title INTL)
    (for [option goes-first-options]
      (merge option {:aria-label (str (:value option) "-goes-first")}))
    on-select])
 
 (defn online-vs-menu [on-select]
-  [menu-option (:online-options-title INTL)
+  [menu-options (:online-options-title INTL)
    (for [option online-options]
      (merge option {:aria-label (:value option)}))
    on-select])

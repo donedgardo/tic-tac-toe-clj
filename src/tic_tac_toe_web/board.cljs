@@ -95,5 +95,5 @@
           [:div
            [player-turn @game]
            [game-over @game]
-           [reset-button #(handle-reset online reset-game)]
+           [reset-button #(handle-reset online (fn [] (reset-game game new-game)))]
            [play-options-menu on-back]]])])))

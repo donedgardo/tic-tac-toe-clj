@@ -35,7 +35,7 @@
         go-back-to-menu #(reset! options default-game-options)]
     (fn []
       (let [{:keys [play-mode ai-difficulty first-player online-mode room-id]} @options
-            ai-mode? (= :ai play-mode)
+            ai-mode? (= "ai" play-mode)
             online-mode? (= :online-vs play-mode)
             hosting-game? (= :host-game online-mode)]
         (cond

@@ -18,13 +18,13 @@
       [create-game]
       (fn [component]
         (is
-          (label-component-in-dom? component ":local-mode")))))
+          (label-component-in-dom? component "local-mode")))))
   (testing "It should show play ai option"
     (with-mounted-component
       [create-game]
       (fn [component]
         (is
-          (label-component-in-dom? component ":ai-mode")))))
+          (label-component-in-dom? component "ai-mode")))))
   (testing "It should show Online VS Mode option"
     (with-mounted-component
       [create-game]
@@ -79,22 +79,22 @@
     (with-mounted-component
       [create-game]
       (fn [component]
-        (click-element (.getByLabelText component ":local-mode"))
+        (click-element (.getByLabelText component "local-mode"))
         (is
           (expect-empty-board component)))))
   (testing "It should go back to play options after clicking the play-option button"
     (with-mounted-component
       [create-game]
       (fn [component]
-        (click-element (.getByLabelText component ":local-mode"))
+        (click-element (.getByLabelText component "local-mode"))
         (click-element (.getByLabelText component "play-options-menu"))
         (is
-          (label-component-in-dom? component ":ai-mode")))))
+          (label-component-in-dom? component "ai-mode")))))
   (testing "It show difficulty options after picking play against ai player player"
     (with-mounted-component
       [create-game]
       (fn [component]
-        (click-element (.getByLabelText component ":ai-mode"))
+        (click-element (.getByLabelText component "ai-mode"))
         (is
           (label-component-in-dom? component "EASY-ai-difficulty"))
         (is
@@ -103,19 +103,19 @@
     (with-mounted-component
       [create-game]
       (fn [component]
-        (click-element (.getByLabelText component ":ai-mode"))
+        (click-element (.getByLabelText component "ai-mode"))
         (click-element (.getByLabelText component "EASY-ai-difficulty"))
         (is
-          (label-component-in-dom? component ":player-goes-first"))
+          (label-component-in-dom? component "player-goes-first"))
         (is
-          (label-component-in-dom? component ":ai-goes-first")))))
+          (label-component-in-dom? component "ai-goes-first")))))
   (testing "It show board with x played when player selects ai to go first"
     (with-mounted-component
       [create-game]
       (fn [component]
-        (click-element (.getByLabelText component ":ai-mode"))
+        (click-element (.getByLabelText component "ai-mode"))
         (click-element (.getByLabelText component "EASY-ai-difficulty"))
-        (click-element (.getByLabelText component ":ai-goes-first"))
+        (click-element (.getByLabelText component "ai-goes-first"))
         (is
           (label-component-in-dom? component #"X-play-"))
         ))))

@@ -19,7 +19,7 @@
   ([options]
   (let [{:keys [ai-difficulty first-player]} options
         ai-play (get-ai-command ai-difficulty)
-        game (if (not (= :ai first-player))
+        game (if (not (= "ai" first-player))
                new-game
                (play new-game (ai-play new-game)))]
     (assoc game :ai-play ai-play))))

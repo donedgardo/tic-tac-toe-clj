@@ -25,6 +25,7 @@
 
 
   :profiles {:dev {:dependencies   [[com.bhauman/figwheel-main "0.2.12"]
+                                    [clj-http "3.12.3"]
                                     [com.bhauman/rebel-readline-cljs "0.1.4"]
                                     [speclj "3.3.2"]]
                    :resource-paths ["target"]

@@ -9,16 +9,16 @@
 (def O "O")
 
 (def new-game
-  {:board empty-board
-   :winner nil
-   :over? false
+  {:board         empty-board
+   :winner        nil
+   :over?         false
    :active-player X
-   :ai-play nil})
+   :ai-play       nil})
 
 
 (def player-symbols [X O])
 
-(def default-game-options {:play-mode nil :ai-play nil :first-player nil :online-mode nil})
+(def default-game-options {:play-mode nil :ai-play nil :first-player nil :online-mode nil :ai-difficulty nil})
 
 (defn get-opponent [player]
   (->> player-symbols

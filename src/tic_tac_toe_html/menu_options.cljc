@@ -4,23 +4,25 @@
     [tic-tac-toe-core.play_options :refer
      [play-mode-options difficulty-options goes-first-options]]))
 
-(defn menu-options-links [title options]
-  [:div
-   [:h2 title]
-   (for [{:keys [href aria-label label]} options]
-     [:a.button
-      {:key        aria-label
-       :aria-label aria-label
-       :href       href} label])])
+(defn menu-options
+  ([title options]
+   [:form {:action "/options" :method "POST"}
+    [:h2 title]
+    (for [{:keys [aria-label value label name]} options]
+      [:button.button
+       {:key        aria-label
+        :name       name
+        :value      value
+        :aria-label aria-label} label])])
+  ([title options on-select]
+   [:div
+    [:h2 title]
+    (for [{:keys [label value aria-label]} options]
+      [:button.button
+       {:key        aria-label
+        :aria-label aria-label
+        :on-click   #(on-select value)} label])]))
 
-(defn menu-options-buttons [title options on-select]
-  [:div
-   [:h2 title]
-   (for [{:keys [label value aria-label]} options]
-     [:a.button
-      {:key        aria-label
-       :aria-label aria-label
-       :on-click   #(on-select value)} label])])
 
 (def play-options-with-aria-label
   (for [option play-mode-options]
@@ -28,11 +30,11 @@
 
 (defn play-mode-menu
   ([]
-   (menu-options-links
+   (menu-options
      (:play-mode-options-title INTL)
      play-options-with-aria-label))
   ([on-select]
-   (menu-options-buttons
+   (menu-options
      (:play-mode-options-title INTL)
      play-options-with-aria-label
      on-select)))
@@ -43,11 +45,11 @@
 
 (defn difficulty-ai-menu
   ([]
-   (menu-options-links
+   (menu-options
      (:difficulty-option-title INTL)
      difficulty-options-with-aria-label))
   ([on-select]
-   (menu-options-buttons
+   (menu-options
      (:difficulty-option-title INTL)
      difficulty-options-with-aria-label
      on-select)))
@@ -58,11 +60,11 @@
 
 (defn goes-first-menu
   ([]
-   (menu-options-links
+   (menu-options
      (:goes-first-option-title INTL)
      goes-first-options-with-aria-label))
   ([on-select]
-   (menu-options-buttons
+   (menu-options
      (:goes-first-option-title INTL)
      goes-first-options-with-aria-label
      on-select)))

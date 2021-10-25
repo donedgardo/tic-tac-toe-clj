@@ -2,7 +2,7 @@
   (:require
     [reagent.core :as reagent :refer [atom]]
     [tic-tac-toe-core.constants :refer [default-game-options]]
-    [tic-tac-toe-html.menu-options :refer [menu-options-buttons play-mode-menu difficulty-ai-menu goes-first-menu]]
+    [tic-tac-toe-html.menu-options :refer [menu-options play-mode-menu difficulty-ai-menu goes-first-menu]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options online-options]]
     [tic-tac-toe-web.host-room :refer [host-game]]
@@ -10,7 +10,7 @@
 
 
 (defn online-vs-menu [on-select]
-  [menu-options-buttons (:online-options-title INTL)
+  [menu-options (:online-options-title INTL)
    (for [option online-options]
      (merge option {:aria-label (:value option)}))
    on-select])

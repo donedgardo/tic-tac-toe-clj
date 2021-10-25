@@ -3,17 +3,17 @@
             [tic-tac-toe-core.ai :refer [get-best-move get-random-move]]))
 
 (def difficulty-options
-  [{:label (:easy-label INTL) :value "easy" }
-   {:label (:hard-label INTL) :value "hard" }])
+  [{:label (:easy-label INTL) :value "easy" :name "difficulty" }
+   {:label (:hard-label INTL) :value "hard" :name "difficulty" }])
 
 (def play-mode-options
-  [{:label (:local-mode INTL) :value "local" }
-   {:label (:ai-mode INTL) :value "ai"}
-   {:label (:online-vs-mode INTL) :value :online-vs }])
+  [{:label (:local-mode INTL) :value "local" :name "mode" }
+   {:label (:ai-mode INTL) :value "ai" :name "mode"}
+   {:label (:online-vs-mode INTL) :value :online-vs :name "mode" }])
 
 (def goes-first-options
-  [{:label (:player-first-label INTL) :value "player" }
-   {:label (:ai-first-label INTL) :value "ai" }])
+  [{:label (:player-first-label INTL) :value "player" :name "first-player" }
+   {:label (:ai-first-label INTL) :value "ai" :name "first-player" }])
 
 (def online-options
   [{:label (:host-game-option INTL)

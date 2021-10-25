@@ -1,7 +1,7 @@
 (ns tic-tac-toe-web.game-over-test
   (:require
     [tic-tac-toe-core.constants :refer [new-game]]
-    [tic-tac-toe-web.board :refer [game-over]]
+    [tic-tac-toe-html.board :refer [game-over]]
     [tic-tac-toe-web.core-test :refer [with-mounted-component]]
     ["@testing-library/react" :as rtl]
     [reagent.core :as r]

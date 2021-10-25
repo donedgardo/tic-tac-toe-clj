@@ -8,7 +8,7 @@
   (cond
     (nil? ai-difficulty)
     nil
-    (= ai-difficulty :easy)
+    (= ai-difficulty "easy")
     get-random-move
     :else
     get-best-move))

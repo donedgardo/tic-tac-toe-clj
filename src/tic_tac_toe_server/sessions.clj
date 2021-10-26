@@ -1,75 +1,69 @@
 (ns tic-tac-toe-server.sessions
   (:require [tic-tac-toe-core.constants :refer [default-game-options]]
-            [tic-tac-toe-core.core :refer [create-game-factory get-ai-command]])
-  (:import (java.util UUID)))
+            [tic-tac-toe-core.persistable :refer [Persistable] :as p]
+            [tic-tac-toe-core.core :refer [get-ai-command]]))
 
 (def sessions (atom {}))
-
-(def session-key "session-id")
-
 (def sessions-file-path "./sessions.txt")
-
-(defn load-sessions []
-  (let [sessions-without-ai-play (clojure.edn/read-string (slurp sessions-file-path))]
-    (reset!
-      sessions
-      (reduce-kv
-        (fn [m k v]
-          (let [game (:game v)
-                options (:options v)
-                ai-play (get-ai-command (:ai-difficulty options))
-                game-with-ai-play (if (nil? game) nil (assoc game :ai-play ai-play))]
-            (assoc m k (assoc v :game game-with-ai-play))))
-        {}
-        sessions-without-ai-play))))
-
-(defn save-sessions [sessions]
+(defn save-sessions [game-sessions]
   (spit
     sessions-file-path
     (str
       (reduce-kv
-        (fn [m k v]
-          (let [game (:game v)
-                game-without-ai-play (if (nil? game) nil (assoc game :ai-play nil))]
-            (assoc m k (assoc v :game game-without-ai-play))))
+        (fn [all-game-sessions game-id game-session]
+          (let [game (:game game-session)
+                serialized-game
+                (if (nil? game) nil (assoc game :ai-play nil :persistence nil))]
+            (assoc
+              all-game-sessions
+              game-id
+              (assoc game-session
+                :game serialized-game))))
         {}
-        sessions))))
+        game-sessions))))
 
-(defn get-session-id [request]
-  (let [cookies (.getCookies request)]
-    (if (or
-          (nil? cookies)
-          (not (.containsKey cookies session-key)))
-      (str (. UUID randomUUID))
-      (.get cookies session-key))))
 
-(defn set-cookies [request handler]
-  (let [session-id (get-session-id request)]
-    (.setCookies handler (str session-key "=" session-id))))
+(deftype FilePersistence []
+  Persistable
+  (get-session-game-options [_ game-id]
+    (let [game (get @sessions game-id)]
+      (:options game)))
+  (get-session-game [_ game-id]
+    (:game (get @sessions game-id)))
+  (save-game-options [_ game-id options]
+    (let [new-game {:options options :game nil}]
+      (do
+        (swap! sessions assoc game-id new-game)
+        (save-sessions @sessions))))
+  (save-game [this game-id game]
+    (let [options (p/get-session-game-options this game-id)
+          new-game {:options options :game game}]
+      (do
+        (println "saving started")
+        (swap! sessions assoc game-id new-game)
+        (save-sessions @sessions)
+        (println "saving ended")))))
 
-(defn get-session-game-options [request]
-  (let [session-id (get-session-id request)]
-    (or (:options (@sessions session-id)) default-game-options)))
+(def game-persistence (FilePersistence.))
 
-(defn get-session-game [request]
-  (let [session-id (get-session-id request)
-        options (get-session-game-options request)]
-    (or
-      (:game (@sessions session-id))
-      (create-game-factory options))))
+(defn load-sessions []
+  (let [game-sessions (clojure.edn/read-string (slurp sessions-file-path))]
+    (reset!
+      sessions
+      (reduce-kv
+        (fn [all-game-sessions game-id game-session]
+          (let [game (:game game-session)
+                options (:options game-session)
+                ai-play (get-ai-command (:ai-difficulty options))
+                deserialized-game
+                (if (nil? game) nil (assoc game :ai-play ai-play :persistence game-persistence ))]
+            (assoc all-game-sessions
+              game-id
+              (assoc game-session
+                :game deserialized-game))))
+        {}
+        game-sessions))))
 
-(defn set-game [request game]
-  (let [session-id (get-session-id request)
-        options (get-session-game-options request)]
-    (do
-      (swap! sessions assoc session-id {:options options :game game})
-      (save-sessions @sessions))))
-
-(defn set-game-options [request options]
-  (let [session-id (get-session-id request)]
-    (do
-      (swap! sessions assoc session-id {:options options :game nil})
-      (save-sessions @sessions))))
 
 
 

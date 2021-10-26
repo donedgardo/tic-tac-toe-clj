@@ -58,7 +58,7 @@
   (or (:over? game)
       (not (index-empty? index (:board game)))))
 
-(defn play [game index]
+(defn get-new-game-state [game index]
   (let [{:keys [board active-player ai-play]} game
         new-board (assoc board index active-player)
         new-game (assoc game :board new-board)
@@ -75,5 +75,14 @@
       :else
       (let [ai-disabled-game (assoc new-game :ai-play nil :active-player opponent)
             ai-move (ai-play ai-disabled-game)
-            game-after-ai (play ai-disabled-game ai-move)]
+            game-after-ai (get-new-game-state ai-disabled-game ai-move)]
         (assoc game-after-ai :ai-play ai-play)))))
+
+(defn play
+  ([game index]
+   (get-new-game-state game index))
+  ([game index {:keys [persistence id]}]
+   (let [game-state (get-new-game-state game index)]
+     (do
+       (.save-game persistence id game-state)
+       game-state))))

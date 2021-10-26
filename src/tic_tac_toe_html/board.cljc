@@ -41,9 +41,10 @@
 
 (defn reset-button
   ([]
-   [:button
-    {:aria-label "reset-game"}
-    "New Game"])
+   [:form  {:action "/new-game" :method "POST"}
+    [:button
+     {:aria-label "reset-game"}
+     "New Game"]])
   ([on-reset]
    [:button
     {:aria-label "reset-game"

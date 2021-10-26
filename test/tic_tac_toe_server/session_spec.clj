@@ -5,18 +5,18 @@
             [tic-tac-toe-server.sessions :refer [load-sessions save-sessions]]))
 
 (def test-sessions
-  {"test"
+  {"game-id"
    {:options
           {:play-mode     nil
            :ai-play       nil
            :first-player  nil
            :online-mode   nil
            :ai-difficulty nil
-           }
+           :id            "game-id"}
     :game nil}})
 
 (def test-sessions-2
-  {"test2"
+  {"game-id"
    {:options default-game-options
     :game    (create-game-factory default-game-options)}})
 
@@ -24,7 +24,7 @@
   (assoc default-game-options :play-mode "ai" :ai-difficulty "easy" :first-player "ai"))
 
 (def test-sessions-3
-  {"test3"
+  {"game-id"
    {:options ai-game-options
     :game    (create-game-factory ai-game-options)}})
 

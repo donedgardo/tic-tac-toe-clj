@@ -3,28 +3,37 @@
             [clj-http.client :as http-client]
             [tic-tac-toe-server.core :refer [start stop]]))
 
-(def session-id "test-id")
+(def game-id "game-id")
+
+(def headers
+  {"Cookie" (str "game-id=" game-id)})
 
 (defn select-ai-mode []
   (http-client/post "http://localhost:3000/options"
                     {:form-params {"mode" "ai"}
-                     :headers     {"Cookie" (str "session-id=" session-id)}}))
+                     :headers     headers}))
+(defn request-new-game []
+  (http-client/post "http://localhost:3000/new-game"
+                    {:headers headers}))
 
 (defn select-difficulty []
   (http-client/post "http://localhost:3000/options"
                     {:form-params {"difficulty" "hard"}
-                     :headers     {"Cookie" (str "session-id=" session-id)}}))
+                     :headers     headers}))
 
 (defn select-goes-first [goes-first]
   (http-client/post "http://localhost:3000/options"
                     {:form-params {"first-player" goes-first}
-                     :headers     {"Cookie" (str "session-id=" session-id)}}))
+                     :headers     headers}))
 
 (defn send-play-request []
   (http-client/post "http://localhost:3000/play"
                     {:form-params {"space" "[0 0]"}
-                     :headers     {"Cookie" (str "session-id=" session-id)}}))
+                     :headers     headers}))
 
+(defn reset-game []
+  (http-client/post "http://localhost:3000/reset"
+                    {:headers headers}))
 
 (defn select-ai-and-difficulty []
   (do
@@ -36,10 +45,6 @@
     (select-ai-mode)
     (select-difficulty)
     (select-goes-first goes-first)))
-
-(defn reset-game []
-  (http-client/post "http://localhost:3000/reset"
-                    {:headers {"Cookie" (str "session-id=" session-id)}}))
 
 (describe
   "tic-tac-toe server application"
@@ -82,4 +87,12 @@
         (re-seq #"empty-board-space-*"
                 (do
                   (select-ai-difficulty-goes-first "player")
-                  (:body (send-play-request))))))))
+                  (:body (send-play-request)))))))
+  (it "shows an new game when requesting the ai new game"
+    (should=
+      8
+      (count
+        (re-seq #"empty-board-space-*"
+                (do
+                  (select-ai-difficulty-goes-first "ai")
+                  (:body (request-new-game))))))))

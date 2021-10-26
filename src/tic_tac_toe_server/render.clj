@@ -1,8 +1,6 @@
 (ns tic-tac-toe-server.render
   (:require [hiccup.core :refer [html]]
-            [tic-tac-toe-core.core :refer [create-game-factory]]
             [tic-tac-toe-html.board :refer [board-space player-turn game-over reset-button play-options-menu]]
-            [tic-tac-toe-server.sessions :refer [set-cookies set-game-options set-game]]
             [tic-tac-toe-html.menu-options :refer [play-mode-menu difficulty-ai-menu goes-first-menu]]))
 
 (defn layout [children]
@@ -52,13 +50,7 @@
             (layout
               (render-application game-session))))
 
-(defn send-game-response [handler request out game-session]
+(defn send-game-response [handler out game-session]
   (do
-    ;ui session
-    (set-cookies request handler)
-    ;persistence
-    (set-game-options request (:options game-session))
-    (set-game request (:game game-session))
-    ;
     (set-html-game-body handler game-session)
     (.send handler out)))

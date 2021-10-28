@@ -1,7 +1,7 @@
 (ns tic-tac-toe-server.routes
   (:require
     [tic-tac-toe-server.cookies-helper :refer [get-session-id get-game-id set-cookies]]
-    [tic-tac-toe-server.sessions :refer [game-persistence]]
+    [tic-tac-toe-server.file_persistence :refer [game-persistence]]
     [tic-tac-toe-core.constants :refer [default-game-options]]
     [tic-tac-toe-core.core :refer [create-game-factory]]
     [tic-tac-toe-core.rules :refer [play]]
@@ -74,10 +74,9 @@
       (let [old-game-id (get-game-id request)
             new-game-id (str (. UUID randomUUID))
             options (.get-session-game-options game-persistence old-game-id)
-            new-options (assoc options :id new-game-id)
             game
-            (create-game-factory new-options {:persistence game-persistence :id new-game-id})
-            game-session {:options new-options :game game}]
+            (create-game-factory options {:persistence game-persistence :id new-game-id})
+            game-session {:options options :game game}]
         (do
           (set-cookies this {:game-id new-game-id})
           (send-game-response this out game-session))))))

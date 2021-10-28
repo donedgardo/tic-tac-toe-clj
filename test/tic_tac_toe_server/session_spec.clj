@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe-core.constants :refer [default-game-options]]
             [tic-tac-toe-core.core :refer [create-game-factory]]
-            [tic-tac-toe-server.sessions :refer [load-sessions save-sessions]]))
+            [tic-tac-toe-server.file_persistence :refer [load-sessions save-sessions]]))
 
 (def test-sessions
   {"game-id"
@@ -11,8 +11,7 @@
            :ai-play       nil
            :first-player  nil
            :online-mode   nil
-           :ai-difficulty nil
-           :id            "game-id"}
+           :ai-difficulty nil}
     :game nil}})
 
 (def test-sessions-2

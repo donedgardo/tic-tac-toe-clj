@@ -1,4 +1,4 @@
-(ns tic-tac-toe-server.sessions
+(ns tic-tac-toe-server.file_persistence
   (:require [tic-tac-toe-core.constants :refer [default-game-options]]
             [tic-tac-toe-core.persistable :refer [Persistable] :as p]
             [tic-tac-toe-core.core :refer [get-ai-command]]))
@@ -13,7 +13,7 @@
         (fn [all-game-sessions game-id game-session]
           (let [game (:game game-session)
                 serialized-game
-                (if (nil? game) nil (assoc game :ai-play nil :persistence nil))]
+                (if (nil? game) nil (assoc game :ai-play nil))]
             (assoc
               all-game-sessions
               game-id
@@ -39,10 +39,8 @@
     (let [options (p/get-session-game-options this game-id)
           new-game {:options options :game game}]
       (do
-        (println "saving started")
         (swap! sessions assoc game-id new-game)
-        (save-sessions @sessions)
-        (println "saving ended")))))
+        (save-sessions @sessions)))))
 
 (def game-persistence (FilePersistence.))
 
@@ -56,7 +54,7 @@
                 options (:options game-session)
                 ai-play (get-ai-command (:ai-difficulty options))
                 deserialized-game
-                (if (nil? game) nil (assoc game :ai-play ai-play :persistence game-persistence ))]
+                (if (nil? game) nil (assoc game :ai-play ai-play ))]
             (assoc all-game-sessions
               game-id
               (assoc game-session

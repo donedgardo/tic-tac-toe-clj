@@ -1,5 +1,5 @@
 (ns tic-tac-toe-server.persistence
-  (:require [tic-tac-toe-server.sessions :refer [game-persistence]]))
+  (:require [tic-tac-toe-server.file_persistence :refer [game-persistence]]))
 
 (defn persist-session [game-id game-session]
   (do

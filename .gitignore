@@ -13,3 +13,4 @@ resources/public/cljs-out/
 .nrepl-port
 .cpcache/
 .rebel_readline_history
+db/

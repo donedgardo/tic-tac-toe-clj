@@ -1,12 +1,13 @@
 (ns tic-tac-toe-server.server-spec
   (:require [speclj.core :refer :all]
             [clj-http.client :as http-client]
-            [tic-tac-toe-server.core :refer [start stop]]))
+            [tic-tac-toe-server.core :refer [start stop]])
+  (:import (java.util UUID)))
 
-(def game-id "game-id")
+(def game-id (atom (. UUID randomUUID)))
 
 (def headers
-  {"Cookie" (str "game-id=" game-id)})
+  {"Cookie" (str "game-id=" @game-id)})
 
 (defn select-ai-mode []
   (http-client/post "http://localhost:3000/options"
@@ -32,8 +33,9 @@
                      :headers     headers}))
 
 (defn reset-game []
-  (http-client/post "http://localhost:3000/reset"
-                    {:headers headers}))
+  (do
+    (http-client/post "http://localhost:3000/reset" {:headers headers})
+    (reset! game-id (. UUID randomUUID))))
 
 (defn select-ai-and-difficulty []
   (do

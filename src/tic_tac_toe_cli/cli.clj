@@ -120,5 +120,3 @@
                 "\n"
                 "Enter " player "s Input: ")
               board)))))))
-
-;(play-cli)

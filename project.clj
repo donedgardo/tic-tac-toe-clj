@@ -13,6 +13,7 @@
                  [clj-commons/secretary "1.2.5-SNAPSHOT"]
                  [venantius/accountant "0.2.4"]
                  [reagent "0.10.0" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
+                 [com.datomic/dev-local "1.0.238"]
                  [hiccup "1.0.5"]]
 
   :source-paths ["src"]
@@ -32,6 +33,10 @@
                    ;; need to add the compiled assets to the :clean-targets
                    :clean-targets  ^{:protect false} ["target"]}}
   :plugins [[speclj "3.3.2"]]
+  :repositories [["cognitect-dev-tools"
+                  {:url      "https://dev-tools.cognitect.com/maven/releases/"
+                   :username :env
+                   :password :env}]]
   :test-paths ["test"])
 
 

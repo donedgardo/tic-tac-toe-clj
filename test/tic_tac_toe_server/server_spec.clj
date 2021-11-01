@@ -6,8 +6,15 @@
 
 (def game-id (atom (. UUID randomUUID)))
 
+(def username "test-username")
+
 (def headers
-  {"Cookie" (str "game-id=" @game-id)})
+  {"Cookie" (str "game-id=" @game-id ";" "user-id=" username)})
+
+(defn login []
+  (http-client/post "http://localhost:3000/login"
+                    {:form-params {"username" username}
+                     :headers     headers}))
 
 (defn select-ai-mode []
   (http-client/post "http://localhost:3000/options"
@@ -52,13 +59,25 @@
   "tic-tac-toe server application"
   (before-all (future (start)))
   (after (reset-game))
+  (it "shows username form"
+    (should=
+      false
+      (nil?
+        (re-find
+          #"Login"
+          (:body (http-client/get "http://localhost:3000"))))))
   (it "shows ai option"
     (should=
       false
       (nil?
         (re-find
           #"ai-mode"
-          (:body (http-client/get "http://localhost:3000"))))))
+          (:body (login))))))
+  (it "shows difficulty options after clicking ai-mode"
+    (should= false
+             (nil? (re-find
+                     #"-ai-difficulty"
+                     (:body (select-ai-mode))))))
   (it "shows difficulty options after clicking ai-mode"
     (should= false
              (nil? (re-find

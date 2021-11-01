@@ -1,7 +1,8 @@
 (ns tic-tac-toe-server.render
   (:require [hiccup.core :refer [html]]
             [tic-tac-toe-html.board :refer [board-space player-turn game-over reset-button play-options-menu]]
-            [tic-tac-toe-html.menu-options :refer [play-mode-menu difficulty-ai-menu goes-first-menu]]))
+            [tic-tac-toe-html.menu-options :refer [play-mode-menu difficulty-ai-menu goes-first-menu]]
+            [tic-tac-toe-html.username-form :refer [username-form]]))
 
 (defn layout [children]
   (html
@@ -34,6 +35,8 @@
   (let [{:keys [play-mode ai-difficulty first-player]} options
         ai-mode? (= "ai" play-mode)]
     (cond
+      (empty? (:players game))
+      (username-form)
       (nil? (:play-mode options))
       (play-mode-menu)
       (and ai-mode?

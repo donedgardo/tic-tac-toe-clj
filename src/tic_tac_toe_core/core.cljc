@@ -14,15 +14,15 @@
     get-best-move))
 
 
-(defn get-ordered-players [players first-player play-mode]
+(defn get-ordered-players [players first-player]
   (let [ai (:ai play-modes)]
     (cond
-      (not (= ai play-mode))
-      players
       (= ai first-player)
       [ai (first players)]
       (= ai first-player)
-      [(first-player) ai])))
+      [(first-player) ai]
+      :else
+      players)))
 
 (defn get-game-with-ai [ai-difficulty first-player]
   (let [ai (:ai play-modes)
@@ -35,9 +35,9 @@
       (assoc new-game :ai-play ai-play))))
 
 (defn create-game [options]
-  (let [{:keys [ai-difficulty first-player play-mode players]} options
+  (let [{:keys [ai-difficulty first-player players]} options
         game-with-ai (get-game-with-ai ai-difficulty first-player)
-        players-ordered (get-ordered-players players first-player play-mode)]
+        players-ordered (get-ordered-players players first-player)]
     (assoc game-with-ai :players players-ordered)))
 
 (defn create-game-factory

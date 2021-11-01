@@ -1,8 +1,8 @@
 (ns tic-tac-toe-server.routes
   (:require
     [tic-tac-toe-server.cookies-helper :refer [get-game-id set-cookies get-username]]
-    [tic-tac-toe-server.file_persistence :refer [game-persistence]]
-    ;[tic-tac-toe-server.datomic-persistence :refer [game-persistence]]
+    ;[tic-tac-toe-server.file_persistence :refer [game-persistence]]
+    [tic-tac-toe-server.datomic-persistence :refer [game-persistence]]
     [tic-tac-toe-core.constants :refer [default-game-options]]
     [tic-tac-toe-core.core :refer [create-game-factory]]
     [tic-tac-toe-core.rules :refer [play]]

@@ -34,10 +34,18 @@
     :db/cardinality :db.cardinality/one
     :db/unique      :db.unique/identity
     :db/doc         "UUID of game"}
+   {:db/ident       :game/winner-username
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/doc         "Winners' username"}
    {:db/ident       :game/options
     :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/one
     :db/doc         "Game options reference"}
+   {:db/ident       :game/players
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/many
+    :db/doc         "Player usernames"}
    {:db/ident       :game/board
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
@@ -73,37 +81,43 @@
                                      :option/ai-difficulty]}]
                                   [:game/uuid game-id])
           serialized-options (:game/options serialized-game)]
-      {:play-mode (:option/play-mode serialized-options)
-       :first-player (:option/first-player serialized-options)
-       :online-mode (:option/first-player serialized-options)
+      {:play-mode     (:option/play-mode serialized-options)
+       :first-player  (:option/first-player serialized-options)
+       :online-mode   (:option/first-player serialized-options)
        :ai-difficulty (:option/ai-difficulty serialized-options)}))
 
   (get-session-game [_ game-id]
     (let [db (d/db connection)
           serialized-game (d/pull db
                                   [:game/board
-                                    :game/winner
-                                    :game/over?
-                                    :game/active-player
+                                   :game/winner
+                                   :game/over?
+                                   :game/:winner-username
+                                   :game/active-player
+                                   :game/players
                                    {:game/options [:option/ai-difficulty]}]
                                   [:game/uuid game-id])
           option (:game/options serialized-game)]
-      {:board (clojure.edn/read-string (:game/board serialized-game))
-       :winner (:game/winner serialized-game)
-       :over? (:game/over? serialized-game)
-       :active-player (:game/active-player serialized-game)
-       :ai-play (get-ai-command (:option/ai-difficulty option))}))
+      {:board           (clojure.edn/read-string (:game/board serialized-game))
+       :winner          (:game/winner serialized-game)
+       :winner-username (:game/winner-username serialized-game)
+       :over?           (:game/over? serialized-game)
+       :active-player   (:game/active-player serialized-game)
+       :players         (:game/players serialized-game)
+       :ai-play         (get-ai-command (:option/ai-difficulty option))}))
 
   (save-game [_ game-id game]
     (d/transact
       connection
       {:tx-data
-       [(remove-nil {:db/id              game-id
-                     :game/uuid          game-id
-                     :game/board         (str (:board game))
-                     :game/winner        (:winner game)
-                     :game/over?         (:over? game)
-                     :game/active-player (:active-player game)})]}))
+       [(remove-nil {:db/id                 game-id
+                     :game/uuid             game-id
+                     :game/board            (str (:board game))
+                     :game/winner           (:winner game)
+                     :game/:winner-username (:winner-username game)
+                     :game/over?            (:over? game)
+                     :game/players          (filter identity (:players game))
+                     :game/active-player    (:active-player game)})]}))
 
   (save-game-options [_ game-id options]
     (d/transact

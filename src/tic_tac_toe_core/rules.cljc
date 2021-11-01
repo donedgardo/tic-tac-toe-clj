@@ -1,5 +1,6 @@
 (ns tic-tac-toe-core.rules
-  (:require [tic-tac-toe-core.constants :refer [get-opponent play-modes]]))
+  (:require [tic-tac-toe-core.constants :refer
+             [get-opponent play-modes get-empty-indexes play-modes]]))
 
 (defn index-empty? [index board] (nil? (board index)))
 
@@ -58,9 +59,16 @@
   (or (:over? game)
       (not (index-empty? index (:board game)))))
 
+(defn get-active-player-username [players board]
+  (let [empty-indexes (get-empty-indexes board)
+        play-count (- (count board) (count empty-indexes))]
+    (if (nil? players)
+      nil
+      (nth players (rem play-count (count players))))))
+
 (defn get-new-game-state
-  ([{:keys [game index username]}]
-   (let [{:keys [board active-player ai-play]} game
+  ([{:keys [game index]}]
+   (let [{:keys [board active-player ai-play players]} game
          new-board (assoc board index active-player)
          new-game (assoc game :board new-board)
          opponent (get-opponent active-player)]
@@ -68,7 +76,9 @@
        (invalid-move? game index)
        game
        (game-has-wining-play? new-board active-player)
-       (assoc new-game :winner active-player :over? true :winner-username username)
+       (assoc new-game :winner active-player
+                       :over? true
+                       :winner-username (get-active-player-username players board))
        (board-full? new-board)
        (assoc new-game :over? true)
        (nil? ai-play)
@@ -85,8 +95,8 @@
 (defn play
   ([game index]
    (get-new-game-state {:game game :index index}))
-  ([game index {:keys [persistence id username]}]
-   (let [game-state (get-new-game-state {:game game :index index :username username})]
+  ([game index {:keys [persistence id]}]
+   (let [game-state (get-new-game-state {:game game :index index})]
      (do
        (.save-game persistence id game-state)
        game-state))))

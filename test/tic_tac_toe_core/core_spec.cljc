@@ -41,14 +41,6 @@
                          (play [0 0])
                          :board
                          get-empty-indexes
-                         count)))
-          (it "ai should play right after player plays"
-            (should= 7
-                     (-> (create-game-factory
-                           {:ai-difficulty "easy" :first-player "player"})
-                         (play [0 0])
-                         :board
-                         get-empty-indexes
                          count))
             (should= 6
                      (-> (create-game-factory

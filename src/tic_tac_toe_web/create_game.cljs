@@ -1,7 +1,7 @@
 (ns tic-tac-toe-web.create-game
   (:require
     [reagent.core :as reagent :refer [atom]]
-    [tic-tac-toe-core.constants :refer [default-game-options]]
+    [tic-tac-toe-core.constants :refer [default-game-options play-modes]]
     [tic-tac-toe-html.menu-options :refer [menu-options play-mode-menu difficulty-ai-menu goes-first-menu]]
     [tic-tac-toe-core.intl :refer [INTL get-winner-announcement get-player-turn-label]]
     [tic-tac-toe-core.play_options :refer [difficulty-options play-mode-options goes-first-options online-options]]
@@ -35,8 +35,8 @@
         go-back-to-menu #(reset! options default-game-options)]
     (fn []
       (let [{:keys [play-mode ai-difficulty first-player online-mode room-id]} @options
-            ai-mode? (= "ai" play-mode)
-            online-mode? (= :online-vs play-mode)
+            ai-mode? (= (:ai play-modes) play-mode)
+            online-mode? (= (:online-vs play-modes) play-mode)
             hosting-game? (= :host-game online-mode)]
         (cond
           (nil? (:play-mode @options))

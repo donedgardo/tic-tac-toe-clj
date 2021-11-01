@@ -1,8 +1,13 @@
 (ns tic-tac-toe-core.rules-spec
   (:require [speclj.core :refer [describe it should=]]
             [tic-tac-toe-core.helpers-spec :refer [tie-game]]
+            [tic-tac-toe-server.file_persistence :refer [game-persistence]]
             [tic-tac-toe-core.rules :refer [play]]
-            [tic-tac-toe-core.constants :refer [new-game X O]]))
+            [tic-tac-toe-core.core :refer [create-game-factory]]
+            [tic-tac-toe-core.constants :refer [new-game X O play-modes ai-difficulties]]))
+
+
+
 
 (describe "tic-tac-toe game over"
           (it "should not be game over with no plays"
@@ -107,3 +112,35 @@
           (it "O should go second"
             (should= O (:active-player
                          (play new-game [0 0])))))
+
+(describe
+  "playing with username"
+  (let [persistence-options {:persistence game-persistence :id "test-game"}
+        x-persistence (assoc persistence-options :username "username-x")
+        o-persistence (assoc persistence-options :username "username-o")]
+    (it "should not store winning-username on cats game"
+      (should= nil
+               (-> (create-game-factory
+                     {:play-mode (:local play-modes)}
+                     persistence-options)
+                   (play [2 1] x-persistence)
+                   (play [0 1] o-persistence)
+                   (play [0 0] x-persistence)
+                   (play [1 1] o-persistence)
+                   (play [0 2] x-persistence)
+                   (play [1 2] o-persistence)
+                   (play [1 0] x-persistence)
+                   (play [2 0] o-persistence)
+                   (play [2 2] x-persistence)
+                   :winner-username)))
+    (it "should store winning-player on x win"
+      (should= (:username x-persistence)
+               (-> (create-game-factory
+                     {:play-mode (:local play-modes)}
+                     persistence-options)
+                   (play [0 0] x-persistence)
+                   (play [1 1] o-persistence)
+                   (play [1 0] x-persistence)
+                   (play [2 2] o-persistence)
+                   (play [2 0] x-persistence)
+                   :winner-username)))))

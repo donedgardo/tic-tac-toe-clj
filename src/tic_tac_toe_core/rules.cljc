@@ -1,5 +1,5 @@
 (ns tic-tac-toe-core.rules
-  (:require [tic-tac-toe-core.constants :refer [get-opponent]]))
+  (:require [tic-tac-toe-core.constants :refer [get-opponent play-modes]]))
 
 (defn index-empty? [index board] (nil? (board index)))
 
@@ -58,31 +58,35 @@
   (or (:over? game)
       (not (index-empty? index (:board game)))))
 
-(defn get-new-game-state [game index]
-  (let [{:keys [board active-player ai-play]} game
-        new-board (assoc board index active-player)
-        new-game (assoc game :board new-board)
-        opponent (get-opponent active-player)]
-    (cond
-      (invalid-move? game index)
-      game
-      (game-has-wining-play? new-board active-player)
-      (assoc new-game :winner active-player :over? true)
-      (board-full? new-board)
-      (assoc new-game :over? true)
-      (nil? ai-play)
-      (assoc new-game :active-player opponent)
-      :else
-      (let [ai-disabled-game (assoc new-game :ai-play nil :active-player opponent)
-            ai-move (ai-play ai-disabled-game)
-            game-after-ai (get-new-game-state ai-disabled-game ai-move)]
-        (assoc game-after-ai :ai-play ai-play)))))
+(defn get-new-game-state
+  ([{:keys [game index username]}]
+   (let [{:keys [board active-player ai-play]} game
+         new-board (assoc board index active-player)
+         new-game (assoc game :board new-board)
+         opponent (get-opponent active-player)]
+     (cond
+       (invalid-move? game index)
+       game
+       (game-has-wining-play? new-board active-player)
+       (assoc new-game :winner active-player :over? true :winner-username username)
+       (board-full? new-board)
+       (assoc new-game :over? true)
+       (nil? ai-play)
+       (assoc new-game :active-player opponent)
+       :else
+       (let [ai-disabled-game (assoc new-game :ai-play nil :active-player opponent)
+             ai-move (ai-play ai-disabled-game)
+             game-after-ai (get-new-game-state
+                             {:game ai-disabled-game
+                              :index ai-move
+                              :username (:ai play-modes)})]
+         (assoc game-after-ai :ai-play ai-play))))))
 
 (defn play
   ([game index]
-   (get-new-game-state game index))
-  ([game index {:keys [persistence id]}]
-   (let [game-state (get-new-game-state game index)]
+   (get-new-game-state {:game game :index index}))
+  ([game index {:keys [persistence id username]}]
+   (let [game-state (get-new-game-state {:game game :index index :username username})]
      (do
        (.save-game persistence id game-state)
        game-state))))

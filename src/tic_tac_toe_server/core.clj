@@ -1,7 +1,7 @@
 (ns tic-tac-toe-server.core
   (:require [hiccup.core :refer [html]]
             [tic-tac-toe-server.routes :refer [routes]]
-            [tic-tac-toe-server.file_persistence :refer [load-sessions]]
+            [tic-tac-toe-server.file_persistence :refer [load-db-file]]
             [tic-tac-toe-html.menu-options :refer [play-mode-menu difficulty-ai-menu goes-first-menu]]))
 
 
@@ -9,7 +9,7 @@
 
 (defn start []
   (do
-    (load-sessions)
+    (load-db-file)
     (.start server 3000 routes)))
 
 (defn stop []

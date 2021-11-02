@@ -92,7 +92,7 @@
                                   [:game/board
                                    :game/winner
                                    :game/over?
-                                   :game/:winner-username
+                                   :game/winner-username
                                    :game/active-player
                                    :game/players
                                    {:game/options [:option/ai-difficulty]}]

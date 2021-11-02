@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe-core.constants :refer [default-game-options]]
             [tic-tac-toe-core.core :refer [create-game-factory]]
-            [tic-tac-toe-server.file_persistence :refer [load-sessions save-sessions]]))
+            [tic-tac-toe-server.file_persistence :refer [load-sessions-file save-sessions-file]]))
 
 (def test-sessions
   {"game-id"
@@ -27,21 +27,22 @@
    {:options ai-game-options
     :game    (create-game-factory ai-game-options)}})
 
+(def suffix "test")
 
 (describe
   "sessions"
-  (before (save-sessions test-sessions))
+  (before (save-sessions-file test-sessions suffix))
   (it "should load a new game session from file"
-    (should= test-sessions (load-sessions)))
+    (should= test-sessions (load-sessions-file suffix)))
   (it "should save a default game session from file"
     (should=
       test-sessions-2
       (do
-        (save-sessions test-sessions-2)
-        (load-sessions))))
+        (save-sessions-file test-sessions-2 suffix)
+        (load-sessions-file suffix))))
   (it "should save an ai game session from file"
     (should=
       test-sessions-3
       (do
-        (save-sessions test-sessions-3)
-        (load-sessions)))))
+        (save-sessions-file test-sessions-3 suffix)
+        (load-sessions-file suffix)))))

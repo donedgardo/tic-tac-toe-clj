@@ -67,7 +67,7 @@
       (nth players (rem play-count (count players))))))
 
 (defn get-new-game-state
-  ([{:keys [game index]}]
+  ([{:keys [game index persistence]}]
    (let [{:keys [board active-player ai-play players]} game
          new-board (assoc board index active-player)
          new-game (assoc game :board new-board)
@@ -76,19 +76,29 @@
        (invalid-move? game index)
        game
        (game-has-wining-play? new-board active-player)
-       (assoc new-game :winner active-player
-                       :over? true
-                       :winner-username (get-active-player-username players board))
+       (let [win-game-state
+             (assoc new-game
+               :winner active-player
+               :over? true
+               :winner-username (get-active-player-username players board))]
+         (do
+           (if (not (nil? persistence))
+             (.record-win persistence win-game-state))
+           win-game-state))
        (board-full? new-board)
-       (assoc new-game :over? true)
+       (let [tie-game-state (assoc new-game :over? true)]
+         (do
+           (if (not (nil? persistence))
+             (.record-tie persistence tie-game-state))
+           tie-game-state))
        (nil? ai-play)
        (assoc new-game :active-player opponent)
        :else
        (let [ai-disabled-game (assoc new-game :ai-play nil :active-player opponent)
              ai-move (ai-play ai-disabled-game)
              game-after-ai (get-new-game-state
-                             {:game ai-disabled-game
-                              :index ai-move
+                             {:game     ai-disabled-game
+                              :index    ai-move
                               :username (:ai play-modes)})]
          (assoc game-after-ai :ai-play ai-play))))))
 
@@ -96,7 +106,7 @@
   ([game index]
    (get-new-game-state {:game game :index index}))
   ([game index {:keys [persistence id]}]
-   (let [game-state (get-new-game-state {:game game :index index})]
+   (let [game-state (get-new-game-state {:game game :index index :persistence persistence})]
      (do
        (.save-game persistence id game-state)
        game-state))))

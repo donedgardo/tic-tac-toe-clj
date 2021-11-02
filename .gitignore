@@ -14,3 +14,4 @@ resources/public/cljs-out/
 .cpcache/
 .rebel_readline_history
 db/
+file-db/

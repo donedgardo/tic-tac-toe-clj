@@ -1,6 +1,7 @@
 (ns tic-tac-toe-server.datomic-persistence
   (:require [datomic.client.api :as d]
             [tic-tac-toe-core.core :refer [get-ai-command]]
+            [tic-tac-toe-core.leaderboard :refer [add-winning-points add-loosing-points add-tie-points]]
             [tic-tac-toe-core.persistable :refer [Persistable]]))
 
 (def client (d/client {:server-type :dev-local
@@ -63,11 +64,38 @@
     :db/doc         "Player who's turn is active"}
    ])
 
+(def leaderboard-schema
+  [{:db/ident       :leaderboard/username
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/unique      :db.unique/identity
+    :db/doc         "Player username"}
+   {:db/ident       :leaderboard/score
+    :db/valueType   :db.type/float
+    :db/cardinality :db.cardinality/one
+    :db/doc         "Score for player"}])
+
 (d/transact connection {:tx-data game-options-schema})
 (d/transact connection {:tx-data game-schema})
+(d/transact connection {:tx-data leaderboard-schema})
 
 (defn remove-nil [map]
   (into {} (remove (comp nil? second) map)))
+
+(defn get-current-score [db username]
+  (or
+    (second
+      (first
+        (d/pull
+          db
+          [:leaderboard/score]
+          [:leaderboard/username username]))) 0))
+
+(defn set-user-score [username score]
+  (d/transact
+    connection
+    {:tx-data [{:leaderboard/username username
+                :leaderboard/score    score}]}))
 
 (deftype DatomicPersistence []
   Persistable
@@ -110,14 +138,14 @@
     (d/transact
       connection
       {:tx-data
-       [(remove-nil {:db/id                 game-id
-                     :game/uuid             game-id
-                     :game/board            (str (:board game))
-                     :game/winner           (:winner game)
-                     :game/:winner-username (:winner-username game)
-                     :game/over?            (:over? game)
-                     :game/players          (filter identity (:players game))
-                     :game/active-player    (:active-player game)})]}))
+       [(remove-nil {:db/id                game-id
+                     :game/uuid            game-id
+                     :game/board           (str (:board game))
+                     :game/winner          (:winner game)
+                     :game/winner-username (:winner-username game)
+                     :game/over?           (:over? game)
+                     :game/players         (filter identity (:players game))
+                     :game/active-player   (:active-player game)})]}))
 
   (save-game-options [_ game-id options]
     (d/transact
@@ -129,6 +157,36 @@
                                    :option/play-mode     (:play-mode options)
                                    :option/first-player  (:first-player options)
                                    :option/online-mode   (:online-mode options)
-                                   :option/ai-difficulty (:ai-difficulty options)})}]})))
+                                   :option/ai-difficulty (:ai-difficulty options)})}]}))
+  (top-players [this limit]
+    (let [db (d/db connection)]
+      (->> (d/q '[:find ?username ?score
+                  :where [?e :leaderboard/score ?score]
+                  [?e :leaderboard/username ?username]]
+                db)
+           (sort-by second)
+           (reverse)
+           (take limit))))
+
+  (record-win [this game]
+    (let [db (d/db connection)
+          winner (:winner-username game)
+          looser (first (filter #(not (= %1 winner)) (:players game)))
+          winner-current-score (get-current-score db winner)
+          looser-current-score (get-current-score db looser)]
+      (do
+        (set-user-score winner (add-winning-points winner-current-score))
+        (set-user-score looser (add-loosing-points looser-current-score)))))
+
+  (record-tie [this game]
+    (let [db (d/db connection)
+          players (:players game)
+          first-player (first players)
+          second-player (second players)
+          first-current-score (get-current-score db first-player)
+          second-current-score (get-current-score db second-player)]
+      (do
+        (set-user-score first-player (add-tie-points first-current-score))
+        (set-user-score second-player (add-tie-points second-current-score))))))
 
 (def game-persistence (DatomicPersistence.))

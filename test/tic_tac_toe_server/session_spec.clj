@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [tic-tac-toe-core.constants :refer [default-game-options]]
             [tic-tac-toe-core.core :refer [create-game-factory]]
-            [tic-tac-toe-server.file_persistence :refer [load-sessions-file save-sessions-file]]))
+            [tic-tac-toe-server.file-persistence :refer [load-sessions-file save-sessions-file]]))
 
 (def test-sessions
   {"game-id"

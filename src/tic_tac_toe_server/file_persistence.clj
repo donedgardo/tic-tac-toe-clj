@@ -1,4 +1,4 @@
-(ns tic-tac-toe-server.file_persistence
+(ns tic-tac-toe-server.file-persistence
   (:require [tic-tac-toe-core.constants :refer [default-game-options]]
             [tic-tac-toe-core.persistable :refer [Persistable] :as p]
             [tic-tac-toe-core.leaderboard :refer [add-winning-points add-loosing-points add-tie-points]]

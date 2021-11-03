@@ -2,7 +2,7 @@
   (:require [speclj.core :refer [describe it before should=]]
             [tic-tac-toe-core.helpers-spec :refer [tie-game]]
             [tic-tac-toe-core.rules :refer [play]]
-            [tic-tac-toe-server.file_persistence :refer [reset-db]]
+            [tic-tac-toe-server.file-persistence :refer [reset-db]]
             [tic-tac-toe-core.core :refer [create-game-factory]]
             [tic-tac-toe-core.constants :refer [new-game X O play-modes ai-difficulties]])
   (:import (tic_tac_toe_server.file_persistence FilePersistence)))

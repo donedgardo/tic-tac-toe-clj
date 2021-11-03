@@ -41,7 +41,7 @@
 
 (defn reset-button
   ([]
-   [:form  {:action "/new-game" :method "POST"}
+   [:form {:action "/new-game" :method "POST"}
     [:button
      {:aria-label "reset-game"}
      "New Game"]])
@@ -53,10 +53,10 @@
 
 (defn play-options-menu
   ([]
-   [:form {:action "/reset" :method "POST"}
-    [:button
-     {:aria-label "play-options-menu"
-      :name "reset" :value true} "Play Options"]])
+   [:a.button
+    {:href       "/reset"
+     :aria-label "play-options-menu"
+     :name       "reset" :value true} "Menu"])
   ([on-back]
    [:button
     {:aria-label "play-options-menu"

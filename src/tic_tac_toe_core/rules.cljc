@@ -99,7 +99,8 @@
              game-after-ai (get-new-game-state
                              {:game     ai-disabled-game
                               :index    ai-move
-                              :username (:ai play-modes)})]
+                              :username (:ai play-modes)
+                              :persistence persistence})]
          (assoc game-after-ai :ai-play ai-play))))))
 
 (defn play

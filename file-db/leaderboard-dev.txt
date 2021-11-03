@@ -1,0 +1,1 @@
+{"ai" 2.5, "donedgardo" 0.5, nil -2.0}

@@ -1,6 +1,7 @@
 (ns tic-tac-toe-server.render
   (:require [hiccup.core :refer [html]]
             [tic-tac-toe-html.board :refer [board-space player-turn game-over reset-button play-options-menu]]
+            [tic-tac-toe-html.leaderboard :refer [leaderboard-html]]
             [tic-tac-toe-html.menu-options :refer [play-mode-menu difficulty-ai-menu goes-first-menu]]
             [tic-tac-toe-html.username-form :refer [username-form]]))
 
@@ -15,7 +16,12 @@
       [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin true}]
       [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap"}]
       [:link {:href "/css/style.css" :rel "stylesheet" :type "text/css"}]]
-     [:body children]]))
+     [:body
+      [:header
+       [:nav
+        (play-options-menu)
+        [:a.button {:href "/leaderboard"} "Leaderboards"]]]
+      [:main children]]]))
 
 (defn tic-tac-toe-board [game]
   [:div.game
@@ -29,7 +35,7 @@
     (player-turn game)
     (game-over game)
     (reset-button)
-    (play-options-menu)]])
+    ]])
 
 (defn render-application [{:keys [options game]}]
   (let [{:keys [play-mode ai-difficulty first-player]} options
@@ -56,4 +62,9 @@
 (defn send-game-response [handler out game-session]
   (do
     (set-html-game-body handler game-session)
+    (.send handler out)))
+
+(defn render-leaderboard-page [handler out leaderboard]
+  (do
+    (.setBody handler (layout (leaderboard-html leaderboard)))
     (.send handler out)))

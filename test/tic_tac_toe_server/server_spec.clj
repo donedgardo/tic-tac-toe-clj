@@ -116,4 +116,11 @@
         (re-seq #"empty-board-space-*"
                 (do
                   (select-ai-difficulty-goes-first "ai")
-                  (:body (request-new-game))))))))
+                  (:body (request-new-game)))))))
+  (it "shows the leaderboard"
+    (should=
+      false
+      (nil?
+        (re-find
+          #"Leaderboard"
+          (:body (http-client/get "http://localhost:3000/leaderboard")))))))

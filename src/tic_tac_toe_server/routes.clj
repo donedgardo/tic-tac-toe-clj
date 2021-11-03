@@ -1,12 +1,12 @@
 (ns tic-tac-toe-server.routes
   (:require
     [tic-tac-toe-server.cookies-helper :refer [get-game-id set-cookies get-username]]
-    ;[tic-tac-toe-server.file_persistence :refer [game-persistence]]
-    [tic-tac-toe-server.datomic-persistence :refer [game-persistence]]
+    [tic-tac-toe-server.file-persistence :refer [game-persistence]]
+    ;[tic-tac-toe-server.datomic-persistence :refer [game-persistence]]
     [tic-tac-toe-core.constants :refer [default-game-options]]
     [tic-tac-toe-core.core :refer [create-game-factory]]
     [tic-tac-toe-core.rules :refer [play]]
-    [tic-tac-toe-server.render :refer [set-html-game-body send-game-response]])
+    [tic-tac-toe-server.render :refer [set-html-game-body send-game-response render-leaderboard-page]])
   (:import (java.util HashMap UUID)))
 
 (def files-route
@@ -116,10 +116,19 @@
           (set-cookies this {:game-id game-id :username username})
           (send-game-response this out game-session))))))
 
-(def routes (HashMap. {"/"         app-handler
-                       "/play"     play-handler
-                       "/login"    login-handler
-                       "/options"  play-options-handler
-                       "/reset"    reset-handler
-                       "/new-game" new-game-handler
-                       "*"         files-route}))
+(def leaderboard-handler
+  (proxy
+    [clean.socket.RequestHandler]
+    []
+    (handle [_ out]
+      (let [leaderboard (.top-players game-persistence 100)]
+        (render-leaderboard-page this out leaderboard)))))
+
+(def routes (HashMap. {"/"            app-handler
+                       "/play"        play-handler
+                       "/login"       login-handler
+                       "/options"     play-options-handler
+                       "/reset"       reset-handler
+                       "/leaderboard" leaderboard-handler
+                       "/new-game"    new-game-handler
+                       "*"            files-route}))
